@@ -1,0 +1,291 @@
+
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+
+修改“PLBG-商品”路径下的“AI测款相关数据概况”面板的数据请求参数和渲染规则，这个面板的数据源是：`ads_ai_product_testing_overview_view`（Cube View）。
+
+
+一、筛选器（下拉选项）Cube Query
+
+说明：
+- 开测开始日期、开测结束日期：使用 Lovable 日期控件，不需要从 Cube 返回选项
+- 其他下拉筛选项：通过 Cube Query 获取 distinct 列表渲染下拉框
+- 下拉筛选项选择后，需要把选中的 values 写入“文本表”的 filters 中，实现联动
+
+1）SPU（sample_code）下拉选项
+{
+  "dimensions": ["ads_ai_product_testing_overview_view.sample_code"],
+  "limit": 5000,
+  "order": {
+    "ads_ai_product_testing_overview_view.sample_code": "asc"
+  }
+}
+
+2）开测年月（test_year_month）下拉选项
+{
+  "dimensions": ["ads_ai_product_testing_overview_view.test_year_month"],
+  "limit": 5000,
+  "order": {
+    "ads_ai_product_testing_overview_view.test_year_month": "desc"
+  }
+}
+
+3）销售渠道（channel）下拉选项
+{
+  "dimensions": ["ads_ai_product_testing_overview_view.channel"],
+  "limit": 1000,
+  "order": {
+    "ads_ai_product_testing_overview_view.channel": "asc"
+  }
+}
+
+4）品类（category）下拉选项
+{
+  "dimensions": ["ads_ai_product_testing_overview_view.category"],
+  "limit": 2000,
+  "order": {
+    "ads_ai_product_testing_overview_view.category": "asc"
+  }
+}
+
+5）SU Name（su_name）下拉选项
+{
+  "dimensions": ["ads_ai_product_testing_overview_view.su_name"],
+  "limit": 5000,
+  "order": {
+    "ads_ai_product_testing_overview_view.su_name": "asc"
+  }
+}
+
+6）到货年月（earliest_delivery_ym）下拉选项
+{
+  "dimensions": ["ads_ai_product_testing_overview_view.earliest_delivery_ym"],
+  "limit": 2000,
+  "order": {
+    "ads_ai_product_testing_overview_view.earliest_delivery_ym": "desc"
+  }
+}
+
+7）开售年月（listing_date_ym）下拉选项
+{
+  "dimensions": ["ads_ai_product_testing_overview_view.listing_date_ym"],
+  "limit": 2000,
+  "order": {
+    "ads_ai_product_testing_overview_view.listing_date_ym": "desc"
+  }
+}
+
+8）采购年月（po_ym）下拉选项
+{
+  "dimensions": ["ads_ai_product_testing_overview_view.po_ym"],
+  "limit": 2000,
+  "order": {
+    "ads_ai_product_testing_overview_view.po_ym": "desc"
+  }
+}
+
+9）销售年月（sales_ym）下拉选项
+{
+  "dimensions": ["ads_ai_product_testing_overview_view.sales_ym"],
+  "limit": 2000,
+  "order": {
+    "ads_ai_product_testing_overview_view.sales_ym": "desc"
+  }
+}
+
+
+
+二、筛选器与文本表 filters 的联动规则
+
+将筛选器的选中值动态传参到文本表的 filters：
+
+- 开测开始日期（Lovable 日期控件）：
+  - 写入 member = ads_ai_product_testing_overview_view.test_start_date
+  - operator = gte
+  - values = ["YYYY-MM-DD"] 或 ["YYYY-MM-DDTHH:MM:SSZ"]
+
+- 开测结束日期（Lovable 日期控件）：
+  - 写入 member = ads_ai_product_testing_overview_view.test_start_date
+  - operator = lte
+  - values = ["YYYY-MM-DD"] 或 ["YYYY-MM-DDTHH:MM:SSZ"]
+
+- SPU（多选）：
+  - member = ads_ai_product_testing_overview_view.sample_code
+  - operator = contains
+  - values = [选中的SPU数组]
+
+- 开测年月（多选）：
+  - member = ads_ai_product_testing_overview_view.test_year_month
+  - operator = contains
+  - values = [选中的开测年月数组]
+
+- 销售渠道（多选）：
+  - member = ads_ai_product_testing_overview_view.channel
+  - operator = contains
+  - values = [选中的渠道数组]
+
+- 品类（多选）：
+  - member = ads_ai_product_testing_overview_view.category
+  - operator = contains
+  - values = [选中的品类数组]
+
+- SU Name（多选）：
+  - member = ads_ai_product_testing_overview_view.su_name
+  - operator = contains
+  - values = [选中的SU Name数组]
+
+- 到货年月（多选）：
+  - member = ads_ai_product_testing_overview_view.earliest_delivery_ym
+  - operator = contains
+  - values = [选中的到货年月数组]
+
+- 开售年月（多选）：
+  - member = ads_ai_product_testing_overview_view.listing_date_ym
+  - operator = contains
+  - values = [选中的开售年月数组]
+
+- 采购年月（多选）：
+  - member = ads_ai_product_testing_overview_view.po_ym
+  - operator = contains
+  - values = [选中的采购年月数组]
+
+- 销售年月（多选）：
+  - member = ads_ai_product_testing_overview_view.sales_ym
+  - operator = contains
+  - values = [选中的销售年月数组]
+
+
+
+三、文本表（明细数据）Cube Query（与筛选器联动）
+
+用途：为“明细数据”文本表返回数据（SPU粒度一行一个SPU），并根据筛选器动态过滤。
+
+Cube Query：
+{
+  "measures": [
+    "ads_ai_product_testing_overview_view.sales_qty",
+    "ads_ai_product_testing_overview_view.net_profit",
+    "ads_ai_product_testing_overview_view.net_profit_ratio",
+    "ads_ai_product_testing_overview_view.ad_ratio",
+    "ads_ai_product_testing_overview_view.cost_of_goods_ratio",
+    "ads_ai_product_testing_overview_view.shipping_ratio",
+    "ads_ai_product_testing_overview_view.refund_ratio",
+    "ads_ai_product_testing_overview_view.test_msrp",
+    "ads_ai_product_testing_overview_view.starting_msrp",
+    "ads_ai_product_testing_overview_view.active_skc_cnt",
+    "ads_ai_product_testing_overview_view.avg_price",
+    "ads_ai_product_testing_overview_view.total_qty",
+    "ads_ai_product_testing_overview_view.inventory_qty",
+    "ads_ai_product_testing_overview_view.inbound_inventory"
+  ],
+  "dimensions": [
+    "ads_ai_product_testing_overview_view.sample_code",
+    "ads_ai_product_testing_overview_view.skc_id",
+    "ads_ai_product_testing_overview_view.su_name",
+    "ads_ai_product_testing_overview_view.title",
+    "ads_ai_product_testing_overview_view.img_url",
+    "ads_ai_product_testing_overview_view.pic_sw",
+    "ads_ai_product_testing_overview_view.pic_look",
+    "ads_ai_product_testing_overview_view.test_start_date",
+    "ads_ai_product_testing_overview_view.sample_plan_date",
+    "ads_ai_product_testing_overview_view.sample_plan_end",
+    "ads_ai_product_testing_overview_view.sample_actual_end",
+    "ads_ai_product_testing_overview_view.po_date",
+    "ads_ai_product_testing_overview_view.expected_delivery_date",
+    "ads_ai_product_testing_overview_view.earliest_delivery_date",
+    "ads_ai_product_testing_overview_view.listing_date",
+    "ads_ai_product_testing_overview_view.supplier_name"
+  ],
+  "filters": [
+    {
+      "member": "ads_ai_product_testing_overview_view.test_start_date",
+      "operator": "gte",
+      "values": []
+    },
+    {
+      "member": "ads_ai_product_testing_overview_view.test_start_date",
+      "operator": "lte",
+      "values": []
+    },
+    {
+      "member": "ads_ai_product_testing_overview_view.sample_code",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_product_testing_overview_view.test_year_month",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_product_testing_overview_view.channel",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_product_testing_overview_view.category",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_product_testing_overview_view.su_name",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_product_testing_overview_view.earliest_delivery_ym",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_product_testing_overview_view.listing_date_ym",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_product_testing_overview_view.po_ym",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_product_testing_overview_view.sales_ym",
+      "operator": "contains",
+      "values": []
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_ai_product_testing_overview_view.net_profit": "desc"
+  }
+}
+
+文本表字段与 Cube 字段映射：
+- SPU: ads_ai_product_testing_overview_view.sample_code
+- SKC: ads_ai_product_testing_overview_view.skc_id
+- SU Name: ads_ai_product_testing_overview_view.su_name
+- Title: ads_ai_product_testing_overview_view.title
+- AI图片: ads_ai_product_testing_overview_view.img_url
+- 实物图: ads_ai_product_testing_overview_view.pic_sw
+- Look图: ads_ai_product_testing_overview_view.pic_look
+- 测试MSRP: ads_ai_product_testing_overview_view.test_msrp
+- 开售MSRP: ads_ai_product_testing_overview_view.starting_msrp
+- 在售SKC数: ads_ai_product_testing_overview_view.active_skc_cnt
+- 开测日期: ads_ai_product_testing_overview_view.test_start_date
+- 研发单日期: ads_ai_product_testing_overview_view.sample_plan_date
+- 正确版日期-预期: ads_ai_product_testing_overview_view.sample_plan_end
+- 正确版日期-实际: ads_ai_product_testing_overview_view.sample_actual_end
+- 下大货日期: ads_ai_product_testing_overview_view.po_date
+- 预计送货日期: ads_ai_product_testing_overview_view.expected_delivery_date
+- 最早送货日期: ads_ai_product_testing_overview_view.earliest_delivery_date
+- 开售日期（含预售）: ads_ai_product_testing_overview_view.listing_date
+- 供应商: ads_ai_product_testing_overview_view.supplier_name
+- 单价: ads_ai_product_testing_overview_view.avg_price
+- 首单数量: ads_ai_product_testing_overview_view.total_qty
+- 在仓库存: ads_ai_product_testing_overview_view.inventory_qty
+- 采购在途: ads_ai_product_testing_overview_view.inbound_inventory
+- 销售量: ads_ai_product_testing_overview_view.sales_qty
+- 净利润: ads_ai_product_testing_overview_view.net_profit
+- 净利润率: ads_ai_product_testing_overview_view.net_profit_ratio
+- 广告占比: ads_ai_product_testing_overview_view.ad_ratio
+- 成本占比: ads_ai_product_testing_overview_view.cost_of_goods_ratio
+- 运费占比: ads_ai_product_testing_overview_view.shipping_ratio
+- 退款率: ads_ai_product_testing_overview_view.refund_ratio
