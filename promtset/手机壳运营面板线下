@@ -1,0 +1,394 @@
+在6贝蒙沃森下面新建一个“手机壳运营数据面板-线下”的面板，
+筛选器：
+渠道，开始日期，结束日期，SPU，SKC，SKU，国家；
+其中渠道，开始日期，结束日期，SPU，作为默认必须有的筛选；
+SKC，SKU，国家 作为可选筛选；只有当筛选器前的勾选框被选择才会显示；且作为维度展示在明细数据表格中；
+对于筛选器分组：
+  事务性描述： 渠道，开始日期，结束日期
+  颗粒度：SPU，SKC，SKU
+  维度：国家 
+汇总卡片：
+包含SPU库存，SKC库存，SKU库存，GMV，销量
+1.除了SPU库存，SKC库存，SKU库存本身作为type为number的dimension，可以不受filters限制外；
+2.其他卡牌的请求参数和返回数据，都需要根据筛选器动态过滤。
+明细表：
+明细表列包括：渠道 SPU SPU名称 SPU库存 SKC SKC名称 SKC库存 SKU SKU名称 SKU库存 国家 GMV 销量 
+只需要生成面板样式，不需要请求参数和返回数据；
+
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+修改贝蒙沃森下面“手机壳运营数据面板-线下”面板的数据请求参数和渲染规则，这个面板的数据源是："ads_shopify_phone_ap_aggregation_view"
+一：筛选器数据请求参数和渲染规则：
+说明：
+- 开始日期、结束日期：使用 Lovable 日期控件，不需要从 Cube 返回选项
+- 其他下拉筛选项：通过 Cube Query 获取 distinct 列表渲染下拉框
+- 下拉筛选项选择后，需要把选中的 values 写入“文本表”的 filters 中，实现联动
+1) SPU（多选下拉框）：
+{
+  "dimensions": ["ads_shopify_phone_ap_aggregation_view.spu_id"], // 指定你想获取列表的维度
+  "order": {
+    "ads_shopify_phone_ap_aggregation_view.spu_id": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                   
+}；
+2) SKC（多选下拉框）：
+{
+  "dimensions": ["ads_shopify_phone_ap_aggregation_view.skc_id"], // 指定你想获取列表的维度
+  "order": {
+    "ads_shopify_phone_ap_aggregation_view.skc_id": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+3)SKU（多选下拉框）：
+{
+  "dimensions": ["ads_shopify_phone_ap_aggregation_view.sku_id"], // 指定你想获取列表的维度
+  "order": {
+    "ads_shopify_phone_ap_aggregation_view.sku_id": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                   
+}；
+4) 国家下拉框：
+{
+  "dimensions": ["ads_shopify_phone_ap_aggregation_view.country_cn"], // 指定你想获取列表的维度
+  "order": {
+    "ads_shopify_phone_ap_aggregation_view.country_cn": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+5) 渠道（多选下拉框）：
+{
+  "dimensions": ["ads_shopify_phone_ap_aggregation_view.channel"], // 指定你想获取列表的维度
+  "order": {
+    "ads_shopify_phone_ap_aggregation_view.channel": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+二、筛选器与文本表 filters 的联动规则
+将筛选器的选中值动态传参到文本表的 filters：
+渠道 （多选下拉框）：
+  - member = ads_shopify_phone_ap_aggregation_view.channel
+  - operator = contains
+  - values = [选中的渠道数组]
+ 开始日期（Lovable 日期控件）：
+  - 写入 member = ads_shopify_phone_ap_aggregation_view.date
+  - operator = gte
+  - values = ["YYYY-MM-DD"] 或 ["YYYY-MM-DDTHH:MM:SSZ"]
+结束日期（Lovable 日期控件）：
+  - 写入 member = ads_shopify_phone_ap_aggregation_view.date
+  - operator = gte
+  - values = ["YYYY-MM-DD"] 或 ["YYYY-MM-DDTHH:MM:SSZ"]
+
+SPU （多选下拉框）：
+  - member = ads_shopify_phone_ap_aggregation_view.spu_id
+  - operator = contains
+  - values = [选中的SPU数组]
+SKC （多选下拉框）：
+  - member = ads_shopify_phone_ap_aggregation_view.skc_id
+  - operator = contains
+  - values = [选中的SKC数组]
+SKU （多选下拉框）：
+  - member = ads_shopify_phone_ap_aggregation_view.sku_id
+  - operator = contains
+  - values = [选中的SKU数组]
+国家 （多下拉框）：
+  - member = ads_shopify_phone_ap_aggregation_view.country_cn
+  - operator = contains
+  - values = [选中的国家数组]
+
+
+三：筛选器可以自定义勾选：
+1）开始日期，结束日期，SPU，渠道，作为默认必须有的筛选
+2）SKC，SKU，国家，作为可选筛选；只有当筛选器前的勾选框被选择后才会显示；且作为维度展示在明细数据表格中；
+
+四：汇总卡片Cube Query（与筛选器联动）
+每个卡牌的请求参数和返回数据：
+1）SPU库存：
+{
+  "dimensions": ["ads_shopify_phone_ap_aggregation_view.spu_inventory_quantity"],
+  "order": {
+    "ads_shopify_phone_ap_aggregation_view.spu_inventory_quantity": "desc"
+  },
+  "limit": 1000
+} 
+2）SKC库存：
+{
+  "dimensions": ["ads_shopify_phone_ap_aggregation_view.skc_inventory_quantity"],
+  "order": {
+    "ads_shopify_phone_ap_aggregation_view.skc_inventory_quantity": "desc"
+  },
+  "limit": 1000
+} 
+3）SKU库存：
+{
+  "dimensions": ["ads_shopify_phone_ap_aggregation_view.sku_inventory_quantity"],
+  "order": {
+    "ads_shopify_phone_ap_aggregation_view.sku_inventory_quantity": "desc"
+  },
+  "limit": 1000
+} 
+
+6）GMV：
+{  "measures": ["ads_shopify_phone_ap_aggregation_view.gmv"], 
+  "order": {
+    "ads_shopify_phone_ap_aggregation_view.gmv": "desc"
+  },
+  "limit": 1000
+} 
+7）销量：
+{  "measures": ["ads_shopify_phone_ap_aggregation_view.quantity"], 
+  "order": {
+    "ads_shopify_phone_ap_aggregation_view.quantity": "desc"
+  },
+  "limit": 1000
+} 
+五、文本表（明细数据）Cube Query（与筛选器联动）
+1）当明细数据的筛选器勾选了SKC，SKU,国家后，需要把选中的 values 写入“文本表”的 filters 中，实现联动
+Cube Query：
+用途：为“明细数据”文本表返回数据（SPU粒度一行一个SPU），并根据筛选器动态过滤
+{
+  "measures": 
+    [
+    "ads_shopify_phone_ap_aggregation_view.gmv",
+    "ads_shopify_phone_ap_aggregation_view.quantity"
+    ],
+  "dimensions": 
+    [
+    "ads_shopify_phone_ap_aggregation_view.channel", 
+    "ads_shopify_phone_ap_aggregation_view.spu_id", 
+    "ads_shopify_phone_ap_aggregation_view.spu_image", 
+    "ads_shopify_phone_ap_aggregation_view.spu_title",
+    "ads_shopify_phone_ap_aggregation_view.spu_inventory_quantity",
+    "ads_shopify_phone_ap_aggregation_view.skc_id", 
+    "ads_shopify_phone_ap_aggregation_view.skc_image", 
+    "ads_shopify_phone_ap_aggregation_view.skc_inventory_quantity",
+    "ads_shopify_phone_ap_aggregation_view.sku_id", 
+    "ads_shopify_phone_ap_aggregation_view.sku_inventory_quantity"，
+    "ads_shopify_phone_ap_aggregation_view.country_cn"，
+    ],
+  "filters": [
+    {
+      "member": "ads_shopify_phone_ap_aggregation_view.channel",
+      "operator": "contains",
+      "values": []
+    },
+     {
+      "member": "ads_shopify_phone_ap_aggregation_view.spu_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_ap_aggregation_view.skc_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_ap_aggregation_view.sku_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_ap_aggregation_view.country_cn",
+      "operator": "contains",
+      "values": []
+    }
+  ],
+  "timeDimensions": [
+    {
+      "dimension": "ads_shopify_phone_ap_aggregation_view.date",
+      "dateRange": [],
+      "granularity": "day"
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_shopify_phone_ap_aggregation_view.date": "desc"
+  }
+}
+2）当明细数据的筛选器勾选了SKC，SKU后，需要把选中的 values 写入“文本表”的 filters 中，实现联动
+Cube Query：
+{
+  "measures": 
+    [
+    "ads_shopify_phone_ap_aggregation_view.gmv",
+    "ads_shopify_phone_ap_aggregation_view.quantity",
+    ],
+  "dimensions": 
+    [
+    "ads_shopify_phone_ap_aggregation_view.channel", 
+    "ads_shopify_phone_ap_aggregation_view.spu_id", 
+    "ads_shopify_phone_ap_aggregation_view.spu_image", 
+    "ads_shopify_phone_ap_aggregation_view.spu_title",
+    "ads_shopify_phone_ap_aggregation_view.spu_inventory_quantity",
+     "ads_shopify_phone_ap_aggregation_view.skc_id", 
+    "ads_shopify_phone_ap_aggregation_view.skc_image", 
+    "ads_shopify_phone_ap_aggregation_view.skc_inventory_quantity",
+    "ads_shopify_phone_ap_aggregation_view.sku_id", 
+    "ads_shopify_phone_ap_aggregation_view.sku_inventory_quantity"
+    ],
+  "filters": [
+      {
+      "member": "ads_shopify_phone_ap_aggregation_view.channel",
+      "operator": "contains",
+      "values": []
+    },
+     {
+      "member": "ads_shopify_phone_ap_aggregation_view.spu_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_ap_aggregation_view.skc_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_ap_aggregation_view.sku_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_ap_aggregation_view.country_cn",
+      "operator": "contains",
+      "values": []
+    }
+  ],
+  "timeDimensions": [
+    {
+      "dimension": "ads_shopify_phone_ap_aggregation_view.date",
+      "dateRange": [],
+      "granularity": "day"
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_shopify_phone_ap_aggregation_view.date": "desc"
+  }
+}
+3）当明细数据的筛选器没有勾选【SKC，SKU，国家】后，需要把选中的 values 写入“文本表”的 filters 中，实现联动：
+Cube Query：
+{
+  "measures": 
+    [
+    "ads_shopify_phone_ap_aggregation_view.gmv",
+    "ads_shopify_phone_ap_aggregation_view.quantity"
+    ],
+  "dimensions": 
+    [
+    "ads_shopify_phone_ap_aggregation_view.channel", 
+    "ads_shopify_phone_ap_aggregation_view.spu_id", 
+    "ads_shopify_phone_ap_aggregation_view.spu_image", 
+    "ads_shopify_phone_ap_aggregation_view.spu_title",
+    "ads_shopify_phone_ap_aggregation_view.spu_inventory_quantity"
+    ],
+  "filters": [
+   {
+      "member": "ads_shopify_phone_ap_aggregation_view.channel",
+      "operator": "contains",
+      "values": []
+    },
+     {
+      "member": "ads_shopify_phone_ap_aggregation_view.spu_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_ap_aggregation_view.skc_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_ap_aggregation_view.sku_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_ap_aggregation_view.country_cn",
+      "operator": "contains",
+      "values": []
+    }
+  ],
+  "timeDimensions": [
+    {
+      "dimension": "ads_shopify_phone_ap_aggregation_view.date",
+      "dateRange": [],
+      "granularity": "day"
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_shopify_phone_ap_aggregation_view.date": "desc"
+  }
+}
+4）当明细数据的筛选器只勾选国家后，需要把选中的 values 写入“文本表”的 filters 中，实现联动：
+Cube Query：
+{
+  "measures": 
+    [
+    "ads_shopify_phone_ap_aggregation_view.gmv",
+    "ads_shopify_phone_ap_aggregation_view.quantity"
+    ],
+  "dimensions": 
+    [
+    "ads_shopify_phone_ap_aggregation_view.channel", 
+    "ads_shopify_phone_ap_aggregation_view.spu_id", 
+    "ads_shopify_phone_ap_aggregation_view.spu_image", 
+    "ads_shopify_phone_ap_aggregation_view.spu_title",
+    "ads_shopify_phone_ap_aggregation_view.spu_inventory_quantity",
+    "ads_shopify_phone_ap_aggregation_view.country_cn"
+    ],
+  "filters": [
+    {
+      "member": "ads_shopify_phone_ap_aggregation_view.channel",
+      "operator": "contains",
+      "values": []
+    },
+     {
+      "member": "ads_shopify_phone_ap_aggregation_view.spu_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_ap_aggregation_view.skc_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_ap_aggregation_view.sku_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_ap_aggregation_view.country_cn",
+      "operator": "contains",
+      "values": []
+    }
+  ],
+  "timeDimensions": [
+    {
+      "dimension": "ads_shopify_phone_ap_aggregation_view.date",
+      "dateRange": [],
+      "granularity": "day"
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_shopify_phone_ap_aggregation_view.date": "desc"
+  }
+}
+五 面板文本内容与cube字段的映射关系：
+说明：明细数据表格中，每个SPU行展示的数据，是根据Cube Query返回的数据，进行映射关系转换后展示的；
+channel 渠道
+SPU	spu_id
+SPU图片	spu_image
+SPU名称	spu_title
+SPU库存	spu_inventory_quantity
+SKC	skc_id
+SKC图片	skc_image
+SKC库存	skc_inventory_quantity
+SKU	sku_id
+SKU库存	sku_inventory_quantity
+国家	country_cn
+GMV	gmv
+销量	quantity
+
+
+
