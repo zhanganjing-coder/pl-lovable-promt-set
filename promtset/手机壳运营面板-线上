@@ -59,7 +59,7 @@ GMV 销量 订单数 净收入 退款A 发货前退款数量 实际发货数量 
   },
   "limit": 1000                    
 }；
-5) 市场下拉框：
+5) 国家下拉框：
 {
   "dimensions": ["ads_shopify_phone_aggregation_test_view.is_ai_product"], // 指定你想获取列表的维度
   "order": {
