@@ -1,1 +1,194 @@
 
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+请求cube的query参数，把country_cn渲染到“手机壳运营数据看板-线上”看板“SPU”这个筛选项的：
+{
+  "dimensions": ["ads_shopify_phone_aggregation_test_view.spu_id"], // 指定你想获取列表的维度
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.spu_id": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                   
+}；
+
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+请求cube的query参数，把country_cn渲染到“手机壳运营数据看板-线上”看板“SKC”这个筛选项的：
+{
+  "dimensions": ["ads_shopify_phone_aggregation_test_view.skc_id"], // 指定你想获取列表的维度
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.skc_id": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+
+
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+请求cube的query参数，把country_cn渲染到“手机壳运营数据看板-线上”看板“SKU”这个筛选项的：
+{
+  "dimensions": ["ads_shopify_phone_aggregation_test_view.sku_id"], // 指定你想获取列表的维度
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.sku_id": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                   
+}；
+
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+请求cube的query参数，把country_cn渲染到“手机壳运营数据看板-线上”看板“素材”这个筛选项的：
+{
+  "dimensions": ["ads_shopify_phone_aggregation_test_view.asset_id"], // 指定你想获取列表的维度
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.asset_id": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+请求cube的query参数，把country_cn渲染到“手机壳运营数据看板-线上”看板“是否测款”这个筛选项的：
+{
+  "dimensions": ["ads_shopify_phone_aggregation_test_view.is_ai_product"], // 指定你想获取列表的维度
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.is_ai_product": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+
+
+
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+请求cube的query参数，把country_cn渲染到“手机壳运营数据看板-线上”看板“国家”这个筛选项的：
+{
+  "dimensions": ["ads_shopify_phone_aggregation_test_view.is_ai_product"], // 指定你想获取列表的维度
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.is_ai_product": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+
+修改 “AI测款广告每日数据” 面板
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+
+SPU 下拉框做动态传参，将参数内容传递到filters的 spu_id 的values中
+SKC 下拉框做动态传参，将参数内容传递到filters的 skc_id 的values中
+SKU 下拉框做动态传参，将参数内容传递到filters的 sku_id 的values中
+素材 下拉框做动态传参，将参数内容传递到filters的 asset_id 的values中
+是否测款 下拉框做动态传参，将参数内容传递到filters的 is_ai_product 的values中
+开始日期结束日期 下拉框做动态传参，将参数内容传递到timeDimensions的 date 的values中
+国家 下拉框做动态传参，将参数内容传递到filters的 country_cn 的values中
+
+明细数据的Cube Query：
+{
+  "measures": 
+    [
+    "ads_shopify_phone_aggregation_test_view.line_item_gmv_usd",
+    "ads_shopify_phone_aggregation_test_view.sales_quantity",
+     "ads_shopify_phone_aggregation_test_view.sales_orders",
+     "ads_shopify_phone_aggregation_test_view.line_item_income_usd",
+    "ads_shopify_phone_aggregation_test_view.created_order_unfulfilled_refund_amount_usd",
+    "ads_shopify_phone_aggregation_test_view.created_order_unfulfilled_refund_quantity",
+    "ads_shopify_phone_aggregation_test_view.fulfilled_quantity",
+    "ads_shopify_phone_aggregation_test_view.total_ad_cost",
+    "ads_shopify_phone_aggregation_test_view.fb_spend_usd",
+    "ads_shopify_phone_aggregation_test_view.google_spend_usd",
+    "ads_shopify_phone_aggregation_test_view.snapchat_spend_usd",
+    "ads_shopify_phone_aggregation_test_view.fb_impressions",
+    "ads_shopify_phone_aggregation_test_view.fb_inline_link_clicks",
+    "ads_shopify_phone_aggregation_test_view.fb_add_to_cart",
+    "ads_shopify_phone_aggregation_test_view.fb_purchase",
+    "ads_shopify_phone_aggregation_test_view.fb_purchase_gmv",
+    "ads_shopify_phone_aggregation_test_view.fb_roas",
+    "ads_shopify_phone_aggregation_test_view.fb_cpa",
+    "ads_shopify_phone_aggregation_test_view.fb_cpc",
+    "ads_shopify_phone_aggregation_test_view.fb_cpm",
+    "ads_shopify_phone_aggregation_test_view.fb_ctr",
+    "ads_shopify_phone_aggregation_test_view.itemsviewed",
+    "ads_shopify_phone_aggregation_test_view.ga_add_to_cart_rate",
+    "ads_shopify_phone_aggregation_test_view.shopify_conversion_rate",
+    ],
+  "dimensions": 
+    [
+    "ads_shopify_phone_aggregation_test_view.spu_id", 
+    "ads_shopify_phone_aggregation_test_view.spu_image", 
+    "ads_shopify_phone_aggregation_test_view.spu_title",
+    "ads_shopify_phone_aggregation_test_view.spu_inventory_quantity",
+     "ads_shopify_phone_aggregation_test_view.skc_id", 
+    "ads_shopify_phone_aggregation_test_view.skc_image", 
+    "ads_shopify_phone_aggregation_test_view.skc_inventory_quantity",
+    "ads_shopify_phone_aggregation_test_view.sku_id", 
+    "ads_shopify_phone_aggregation_test_view.sku_inventory_quantity"
+    ],
+  "filters": [
+     {
+      "member": "ads_shopify_phone_aggregation_test_view.spu_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.skc_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.sku_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.asset_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.is_ai_product",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.country_cn",
+      "operator": "contains",
+      "values": []
+    }
+  ],
+  "timeDimensions": [
+    {
+      "dimension": "ads_shopify_phone_aggregation_test_view.date",
+      "dateRange": [],
+      "granularity": "day"
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.date": "desc"
+  }
+}
+明细数据与cube字段的映射关系：
+SPU	spu_id
+SPU图片	spu_image
+SPU名称	spu_title
+SPU库存	spu_inventory_quantity
+SKC	skc_id
+SKC图片	skc_image
+SKC库存	skc_inventory_quantity
+SKU	sku_id
+SKU库存	sku_inventory_quantity
+GMV	line_item_gmv_usd
+销量	sales_quantity
+订单数	sales_orders
+净收入	line_item_income_usd
+退款A	created_order_unfulfilled_refund_amount_usd
+发货前退款数量	created_order_unfulfilled_refund_quantity
+实际发货数量	fulfilled_quantity
+广告总花费	total_ad_cost
+FB花费	fb_spend_usd
+谷歌花费	google_spend_usd
+Snap花费	snapchat_spend_usd
+FB曝光量	fb_impressions
+FB链接点击数	fb_inline_link_clicks
+FB加入购物车数	fb_add_to_cart
+FB订单数	fb_purchase
+FB_GMV	FB_GMV
+FB_ROAS	fb_roas
+FB_CPA	fb_cpa
+FB_CPC	fb_cpc
+FB_CPM	fb_cpm
+FB_CTR	fb_ctr
+浏览量	itemsviewed
+加购率	ga_add_to_cart_rate
+转化率	shopify_conversion_rate
