@@ -1,1 +1,220 @@
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+请求cube的query参数，把country_cn渲染到“AI测款广告每日数据”看板“国家”这个筛选项的：
+{
+  "dimensions": ["ads_ai_adtesting_spu_daily_view.country_cn", "ads_ai_adtesting_spu_daily_view.country_code"], // 指定你想获取列表的维度
+  "order": {
+    "ads_ai_adtesting_spu_daily_view.country_cn": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    // 建议设置限制，防止维度值过多（如用户ID）导致崩溃
+}；
+
+请求cube的query参数，把planing_name渲染到“AI测款广告每日数据”看板“su Name”这个筛选项：
+{
+  "dimensions": ["ads_ai_adtesting_spu_daily_view.planing_name"],
+  "limit": 1000,
+  "order": {
+    "ads_ai_adtesting_spu_daily_view.planing_name": "asc"
+  }
+}；
+
+请求cube的query参数，把sample_code渲染到“AI测款广告每日数据”看板“spu”这个筛选项：
+{
+  "dimensions": ["ads_ai_adtesting_spu_daily_view.sample_code"],
+  "limit": 5000,
+  "order": {
+    "ads_ai_adtesting_spu_daily_view.sample_code": "asc"
+  }
+}；
+
+请求cube的query参数，把year_month渲染到“AI测款广告每日数据”看板“年月”这个筛选项：
+{
+  "dimensions": ["ads_ai_adtesting_spu_daily_view.year_month"],
+  "limit": 5000,
+  "order": {
+    "ads_ai_adtesting_spu_daily_view.year_month": "desc"
+  }
+}；
+
+修改 “AI测款广告每日数据” 面板
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+国家 下拉框做动态传参，将参数内容传递到filters的 country_cn 的values中
+SPU 下拉框做动态传参，将参数内容传递到filters的 sample_code 的values中
+su name下拉框做动态传参，将参数内容传递到filters的 planing_name 的values中
+年月 下拉框做动态传参，将参数内容传递到filters的 year_month 的values中
+明细数据的Cube Query：
+{
+  "measures": 
+    ["ads_ai_adtesting_spu_daily_view.target_roi",
+    "ads_ai_adtesting_spu_daily_view.item_quantity_by_spu",
+    "ads_ai_adtesting_spu_daily_view.split_fb_spend_usd_by_spu",
+    "ads_ai_adtesting_spu_daily_view.roi",
+    "ads_ai_adtesting_spu_daily_view.cpc"
+    ],
+  "dimensions": 
+    ["ads_ai_adtesting_spu_daily_view.sample_code", 
+    "ads_ai_adtesting_spu_daily_view.img_url", 
+    "ads_ai_adtesting_spu_daily_view.date"
+    ],
+  "filters": [
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.country_cn",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.sample_code",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.planing_name",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.year_month",
+      "operator": "contains",
+      "values": []
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_ai_adtesting_spu_daily_view.date: "desc",
+    "ads_ai_adtesting_spu_daily_view.item_quantity_by_spu: "desc"
+  },
+}
+明细数据与cube字段的映射关系：
+SPU:"sample_code"
+图片: "img_url"
+日期: "date"
+目标ROI: "target_roi"
+ROI:"roi"
+CPC: "cpc"
+销量: "item_quantity_by_spu"
+FB花费: "split_fb_spend_usd_by_spu"；
+
+图表1：目标 ROI 与 ROI 对比图表的Cube Query：
+{
+  "measures": [
+    "ads_ai_adtesting_spu_daily_view.target_roi",
+    "ads_ai_adtesting_spu_daily_view.roi"
+  ],
+  "dimensions": [
+    "ads_ai_adtesting_spu_daily_view.date"
+  ],
+  "filters": [
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.country_cn",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.sample_code",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.planing_name",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.year_month",
+      "operator": "contains",
+      "values": []
+    }
+  ],
+  "order": {
+    "ads_ai_adtesting_spu_daily_view.date": "asc"
+  }
+}
+图表渲染规则：
+- 图表类型：折线图
+- X 轴：date
+- Y 轴：ROI
+- 线条 1：目标 ROI（target_roi）
+- 线条 2：实际 ROI（roi）；
+
+图表2：CPC 随时间变化的Cube Query：
+{
+  "measures": [
+    "ads_ai_adtesting_spu_daily_view.cpc"
+  ],
+  "dimensions": [
+    "ads_ai_adtesting_spu_daily_view.date"
+  ],
+  "filters": [
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.country_cn",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.sample_code",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.planing_name",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.year_month",
+      "operator": "contains",
+      "values": []
+    }
+  ],
+  "order": {
+    "ads_ai_adtesting_spu_daily_view.date": "asc"
+  }
+}
+图表渲染规则：
+- 图表类型：折线图
+- X 轴：date
+- Y 轴：CPC（美元）
+- 单条折线
+
+图表3：销量与 FB 花费对比图表的Cube Query：
+{
+  "measures": [
+    "ads_ai_adtesting_spu_daily_view.item_quantity_by_spu",
+    "ads_ai_adtesting_spu_daily_view.split_fb_spend_usd_by_spu"
+  ],
+  "dimensions": [
+    "ads_ai_adtesting_spu_daily_view.date"
+  ],
+  "filters": [
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.country_cn",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.sample_code",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.planing_name",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_ai_adtesting_spu_daily_view.year_month",
+      "operator": "contains",
+      "values": []
+    }
+  ],
+  "order": {
+    "ads_ai_adtesting_spu_daily_view.date": "asc"
+  }
+}
+图表渲染规则：
+- 图表类型：柱线组合图
+- X 轴：date
+- 柱状图：销量（item_quantity_by_spu，左轴）
+- 折线图：FB 花费（split_fb_spend_usd_by_spu，右轴）
+
+注意：图表仅展示近 30 天的数据；使用 ads_ai_adtesting_spu_daily_view.date，按 day 聚合
 
