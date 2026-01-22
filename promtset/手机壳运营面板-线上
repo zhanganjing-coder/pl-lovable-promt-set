@@ -1,6 +1,25 @@
+在6贝蒙沃森下面新建一个“手机壳运营数据面板-线上”的面板，
+筛选器：
+开始日期，结束日期，SPU，SKC，SKU，素材，是否测款，国家；
+其中开始日期，结束日期，SPU，是否测款 作为默认必须有的筛选；
+SKC，SKU，素材，国家 作为可选筛选；只有当筛选器前的勾选框吧被选择后才会显示；且作为维度展示在明细数据表格中；
+对于筛选器分组：
+  事务性描述：开始日期，结束日期，是否测款 
+  颗粒度：SPU，SKC，SKU，素材，
+  维度：国家 
+明细表列名为：SPU SPU名称 SPU库存 SKC SKC名称 SKC库存 SKU SKU名称 SKU库存 素材 素材内容 国家 
+GMV 销量 订单数 净收入 退款A 发货前退款数量 实际发货数量 广告总花费 FB花费 谷歌花费 Snap花费 FB曝光量 FB链接点击数 FB加入购物车数 FB订单数 FB_GMV FB_ROAS FB_CPA FB_CPC FB_CPM FB_CTR 浏览量 加购率 转化率；
+只需要生成面板样式，不需要请求参数和返回数据；
+
 
 官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
-请求cube的query参数，把country_cn渲染到“手机壳运营数据看板-线上”看板“SPU”这个筛选项的：
+修改贝蒙沃森下面“手机壳运营数据面板-线上”面板的数据请求参数和渲染规则，这个面板的数据源是："ads_shopify_phone_aggregation_test_view
+一：筛选器数据请求参数和渲染规则：
+说明：
+- 开始日期、结束日期：使用 Lovable 日期控件，不需要从 Cube 返回选项
+- 其他下拉筛选项：通过 Cube Query 获取 distinct 列表渲染下拉框
+- 下拉筛选项选择后，需要把选中的 values 写入“文本表”的 filters 中，实现联动
+1)SPU下拉框：
 {
   "dimensions": ["ads_shopify_phone_aggregation_test_view.spu_id"], // 指定你想获取列表的维度
   "order": {
@@ -8,9 +27,7 @@
   },
   "limit": 1000                   
 }；
-
-官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
-请求cube的query参数，把country_cn渲染到“手机壳运营数据看板-线上”看板“SKC”这个筛选项的：
+2)SKC下拉框：
 {
   "dimensions": ["ads_shopify_phone_aggregation_test_view.skc_id"], // 指定你想获取列表的维度
   "order": {
@@ -18,10 +35,7 @@
   },
   "limit": 1000                    
 }；
-
-
-官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
-请求cube的query参数，把country_cn渲染到“手机壳运营数据看板-线上”看板“SKU”这个筛选项的：
+3)SKU下拉框：
 {
   "dimensions": ["ads_shopify_phone_aggregation_test_view.sku_id"], // 指定你想获取列表的维度
   "order": {
@@ -29,9 +43,7 @@
   },
   "limit": 1000                   
 }；
-
-官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
-请求cube的query参数，把country_cn渲染到“手机壳运营数据看板-线上”看板“素材”这个筛选项的：
+3)素材下拉框：
 {
   "dimensions": ["ads_shopify_phone_aggregation_test_view.asset_id"], // 指定你想获取列表的维度
   "order": {
@@ -39,9 +51,15 @@
   },
   "limit": 1000                    
 }；
-
-官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
-请求cube的query参数，把country_cn渲染到“手机壳运营数据看板-线上”看板“是否测款”这个筛选项的：
+4)是否测款下拉框：
+{
+  "dimensions": ["ads_shopify_phone_aggregation_test_view.is_ai_product"], // 指定你想获取列表的维度
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.is_ai_product": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+5) 市场下拉框：
 {
   "dimensions": ["ads_shopify_phone_aggregation_test_view.is_ai_product"], // 指定你想获取列表的维度
   "order": {
@@ -50,30 +68,148 @@
   "limit": 1000                    
 }；
 
+二、筛选器与文本表 filters 的联动规则
+将筛选器的选中值动态传参到文本表的 filters：
+ 开始日期（Lovable 日期控件）：
+  - 写入 member = ads_shopify_phone_aggregation_test_view.date
+  - operator = gte
+  - values = ["YYYY-MM-DD"] 或 ["YYYY-MM-DDTHH:MM:SSZ"]
+结束日期（Lovable 日期控件）：
+  - 写入 member = ads_shopify_phone_aggregation_test_view.date
+  - operator = gte
+  - values = ["YYYY-MM-DD"] 或 ["YYYY-MM-DDTHH:MM:SSZ"]
 
 
-官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
-请求cube的query参数，把country_cn渲染到“手机壳运营数据看板-线上”看板“国家”这个筛选项的：
+SPU （多选下拉框）：
+  - member = ads_shopify_phone_aggregation_test_view.spu_id
+  - operator = contains
+  - values = [选中的SPU数组]
+SKC （多选下拉框）：
+  - member = ads_shopify_phone_aggregation_test_view.skc_id
+  - operator = contains
+  - values = [选中的SKC数组]
+SKU （多选下拉框）：
+  - member = ads_shopify_phone_aggregation_test_view.sku_id
+  - operator = contains
+  - values = [选中的SKU数组]
+素材 （多选下拉框）：
+  - member = ads_shopify_phone_aggregation_test_view.asset_id
+  - operator = contains
+  - values = [选中的素材数组]
+是否测款 （单选下拉框）：
+  - member = ads_shopify_phone_aggregation_test_view.is_ai_product
+  - operator = contains
+  - values = [选中的是否测款数组]
+开始日期（Lovable 日期控件）：
+  - 写入 member = ads_shopify_phone_aggregation_test_view.date
+  - operator = gte
+  - values = ["YYYY-MM-DD"] 或 ["YYYY-MM-DDTHH:MM:SSZ"]
+结束日期（Lovable 日期控件）：
+  - 写入 member = ads_shopify_phone_aggregation_test_view.date
+  - operator = gte
+  - values = ["YYYY-MM-DD"] 或 ["YYYY-MM-DDTHH:MM:SSZ"]
+国家 （单选下拉框）：
+  - member = ads_shopify_phone_aggregation_test_view.country_cn
+  - operator = contains
+  - values = [选中的国家数组]
+
+三：筛选器可以自定义勾选：
+1）开始日期，结束日期，SPU，是否测款 作为默认必须有的筛选
+2）SKC，SKU，素材，国家 作为可选筛选；只有当筛选器前的勾选框吧被选择后才会显示；且作为维度展示在明细数据表格中；
+
+四、文本表（明细数据）Cube Query（与筛选器联动）
+1）当明细数据的筛选器勾选了SKC，SKU，素材，国家 后，需要把选中的 values 写入“文本表”的 filters 中，实现联动
+Cube Query：
+用途：为“明细数据”文本表返回数据（SPU粒度一行一个SPU），并根据筛选器动态过滤
 {
-  "dimensions": ["ads_shopify_phone_aggregation_test_view.is_ai_product"], // 指定你想获取列表的维度
+  "measures": 
+    [
+    "ads_shopify_phone_aggregation_test_view.line_item_gmv_usd",
+    "ads_shopify_phone_aggregation_test_view.sales_quantity",
+     "ads_shopify_phone_aggregation_test_view.sales_orders",
+     "ads_shopify_phone_aggregation_test_view.line_item_income_usd",
+    "ads_shopify_phone_aggregation_test_view.created_order_unfulfilled_refund_amount_usd",
+    "ads_shopify_phone_aggregation_test_view.created_order_unfulfilled_refund_quantity",
+    "ads_shopify_phone_aggregation_test_view.fulfilled_quantity",
+    "ads_shopify_phone_aggregation_test_view.total_ad_cost",
+    "ads_shopify_phone_aggregation_test_view.fb_spend_usd",
+    "ads_shopify_phone_aggregation_test_view.google_spend_usd",
+    "ads_shopify_phone_aggregation_test_view.snapchat_spend_usd",
+    "ads_shopify_phone_aggregation_test_view.fb_impressions",
+    "ads_shopify_phone_aggregation_test_view.fb_inline_link_clicks",
+    "ads_shopify_phone_aggregation_test_view.fb_add_to_cart",
+    "ads_shopify_phone_aggregation_test_view.fb_purchase",
+    "ads_shopify_phone_aggregation_test_view.fb_purchase_gmv",
+    "ads_shopify_phone_aggregation_test_view.fb_roas",
+    "ads_shopify_phone_aggregation_test_view.fb_cpa",
+    "ads_shopify_phone_aggregation_test_view.fb_cpc",
+    "ads_shopify_phone_aggregation_test_view.fb_cpm",
+    "ads_shopify_phone_aggregation_test_view.fb_ctr",
+    "ads_shopify_phone_aggregation_test_view.itemsviewed",
+    "ads_shopify_phone_aggregation_test_view.ga_add_to_cart_rate",
+    "ads_shopify_phone_aggregation_test_view.shopify_conversion_rate",
+    ],
+  "dimensions": 
+    [
+    "ads_shopify_phone_aggregation_test_view.spu_id", 
+    "ads_shopify_phone_aggregation_test_view.spu_image", 
+    "ads_shopify_phone_aggregation_test_view.spu_title",
+    "ads_shopify_phone_aggregation_test_view.spu_inventory_quantity",
+     "ads_shopify_phone_aggregation_test_view.skc_id", 
+    "ads_shopify_phone_aggregation_test_view.skc_image", 
+    "ads_shopify_phone_aggregation_test_view.skc_inventory_quantity",
+    "ads_shopify_phone_aggregation_test_view.sku_id", 
+    "ads_shopify_phone_aggregation_test_view.sku_inventory_quantity"，
+    "ads_shopify_phone_aggregation_test_view.asset_id"，
+    "ads_shopify_phone_aggregation_test_view.asset_content"，
+    "ads_shopify_phone_aggregation_test_view.country_cn"，
+    ],
+  "filters": [
+     {
+      "member": "ads_shopify_phone_aggregation_test_view.spu_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.skc_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.sku_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.asset_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.is_ai_product",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.country_cn",
+      "operator": "contains",
+      "values": []
+    }
+  ],
+  "timeDimensions": [
+    {
+      "dimension": "ads_shopify_phone_aggregation_test_view.date",
+      "dateRange": [],
+      "granularity": "day"
+    }
+  ],
+  "limit": 5000,
   "order": {
-    "ads_shopify_phone_aggregation_test_view.is_ai_product": "asc"         // 可选：按字母顺序排序
-  },
-  "limit": 1000                    
-}；
-
-修改 “AI测款广告每日数据” 面板
-官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
-
-SPU 下拉框做动态传参，将参数内容传递到filters的 spu_id 的values中
-SKC 下拉框做动态传参，将参数内容传递到filters的 skc_id 的values中
-SKU 下拉框做动态传参，将参数内容传递到filters的 sku_id 的values中
-素材 下拉框做动态传参，将参数内容传递到filters的 asset_id 的values中
-是否测款 下拉框做动态传参，将参数内容传递到filters的 is_ai_product 的values中
-开始日期结束日期 下拉框做动态传参，将参数内容传递到timeDimensions的 date 的values中
-国家 下拉框做动态传参，将参数内容传递到filters的 country_cn 的values中
-
-明细数据的Cube Query：
+    "ads_shopify_phone_aggregation_test_view.date": "desc"
+  }
+}
+2）当明细数据的筛选器勾选了SKC，SKU，后，需要把选中的 values 写入“文本表”的 filters 中，实现联动
+Cube Query：
 {
   "measures": 
     [
@@ -158,7 +294,171 @@ SKU 下拉框做动态传参，将参数内容传递到filters的 sku_id 的valu
     "ads_shopify_phone_aggregation_test_view.date": "desc"
   }
 }
-明细数据与cube字段的映射关系：
+3）当明细数据的筛选器没有勾选SKC，SKU，素材，国家后，需要把选中的 values 写入“文本表”的 filters 中，实现联动：
+Cube Query：
+{
+  "measures": 
+    [
+    "ads_shopify_phone_aggregation_test_view.line_item_gmv_usd",
+    "ads_shopify_phone_aggregation_test_view.sales_quantity",
+     "ads_shopify_phone_aggregation_test_view.sales_orders",
+     "ads_shopify_phone_aggregation_test_view.line_item_income_usd",
+    "ads_shopify_phone_aggregation_test_view.created_order_unfulfilled_refund_amount_usd",
+    "ads_shopify_phone_aggregation_test_view.created_order_unfulfilled_refund_quantity",
+    "ads_shopify_phone_aggregation_test_view.fulfilled_quantity",
+    "ads_shopify_phone_aggregation_test_view.total_ad_cost",
+    "ads_shopify_phone_aggregation_test_view.fb_spend_usd",
+    "ads_shopify_phone_aggregation_test_view.google_spend_usd",
+    "ads_shopify_phone_aggregation_test_view.snapchat_spend_usd",
+    "ads_shopify_phone_aggregation_test_view.fb_impressions",
+    "ads_shopify_phone_aggregation_test_view.fb_inline_link_clicks",
+    "ads_shopify_phone_aggregation_test_view.fb_add_to_cart",
+    "ads_shopify_phone_aggregation_test_view.fb_purchase",
+    "ads_shopify_phone_aggregation_test_view.fb_purchase_gmv",
+    "ads_shopify_phone_aggregation_test_view.fb_roas",
+    "ads_shopify_phone_aggregation_test_view.fb_cpa",
+    "ads_shopify_phone_aggregation_test_view.fb_cpc",
+    "ads_shopify_phone_aggregation_test_view.fb_cpm",
+    "ads_shopify_phone_aggregation_test_view.fb_ctr",
+    "ads_shopify_phone_aggregation_test_view.itemsviewed",
+    "ads_shopify_phone_aggregation_test_view.ga_add_to_cart_rate",
+    "ads_shopify_phone_aggregation_test_view.shopify_conversion_rate",
+    ],
+  "dimensions": 
+    [
+    "ads_shopify_phone_aggregation_test_view.spu_id", 
+    "ads_shopify_phone_aggregation_test_view.spu_image", 
+    "ads_shopify_phone_aggregation_test_view.spu_title",
+    "ads_shopify_phone_aggregation_test_view.spu_inventory_quantity"
+    ],
+  "filters": [
+     {
+      "member": "ads_shopify_phone_aggregation_test_view.spu_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.skc_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.sku_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.asset_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.is_ai_product",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.country_cn",
+      "operator": "contains",
+      "values": []
+    }
+  ],
+  "timeDimensions": [
+    {
+      "dimension": "ads_shopify_phone_aggregation_test_view.date",
+      "dateRange": [],
+      "granularity": "day"
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.date": "desc"
+  }
+}
+4）当明细数据的筛选器只勾选国家后，需要把选中的 values 写入“文本表”的 filters 中，实现联动：
+Cube Query：
+{
+  "measures": 
+    [
+    "ads_shopify_phone_aggregation_test_view.line_item_gmv_usd",
+    "ads_shopify_phone_aggregation_test_view.sales_quantity",
+     "ads_shopify_phone_aggregation_test_view.sales_orders",
+     "ads_shopify_phone_aggregation_test_view.line_item_income_usd",
+    "ads_shopify_phone_aggregation_test_view.created_order_unfulfilled_refund_amount_usd",
+    "ads_shopify_phone_aggregation_test_view.created_order_unfulfilled_refund_quantity",
+    "ads_shopify_phone_aggregation_test_view.fulfilled_quantity",
+    "ads_shopify_phone_aggregation_test_view.total_ad_cost",
+    "ads_shopify_phone_aggregation_test_view.fb_spend_usd",
+    "ads_shopify_phone_aggregation_test_view.google_spend_usd",
+    "ads_shopify_phone_aggregation_test_view.snapchat_spend_usd",
+    "ads_shopify_phone_aggregation_test_view.fb_impressions",
+    "ads_shopify_phone_aggregation_test_view.fb_inline_link_clicks",
+    "ads_shopify_phone_aggregation_test_view.fb_add_to_cart",
+    "ads_shopify_phone_aggregation_test_view.fb_purchase",
+    "ads_shopify_phone_aggregation_test_view.fb_purchase_gmv",
+    "ads_shopify_phone_aggregation_test_view.fb_roas",
+    "ads_shopify_phone_aggregation_test_view.fb_cpa",
+    "ads_shopify_phone_aggregation_test_view.fb_cpc",
+    "ads_shopify_phone_aggregation_test_view.fb_cpm",
+    "ads_shopify_phone_aggregation_test_view.fb_ctr",
+    "ads_shopify_phone_aggregation_test_view.itemsviewed",
+    "ads_shopify_phone_aggregation_test_view.ga_add_to_cart_rate",
+    "ads_shopify_phone_aggregation_test_view.shopify_conversion_rate",
+    ],
+  "dimensions": 
+    [
+    "ads_shopify_phone_aggregation_test_view.spu_id", 
+    "ads_shopify_phone_aggregation_test_view.spu_image", 
+    "ads_shopify_phone_aggregation_test_view.spu_title",
+    "ads_shopify_phone_aggregation_test_view.spu_inventory_quantity",
+    "ads_shopify_phone_aggregation_test_view.country_cn"
+    ],
+  "filters": [
+     {
+      "member": "ads_shopify_phone_aggregation_test_view.spu_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.skc_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.sku_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.asset_id",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.is_ai_product",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_phone_aggregation_test_view.country_cn",
+      "operator": "contains",
+      "values": []
+    }
+  ],
+  "timeDimensions": [
+    {
+      "dimension": "ads_shopify_phone_aggregation_test_view.date",
+      "dateRange": [],
+      "granularity": "day"
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.date": "desc"
+  }
+}
+五 面板文本内容与cube字段的映射关系：
+说明：明细数据表格中，每个SPU行展示的数据，是根据Cube Query返回的数据，进行映射关系转换后展示的；
 SPU	spu_id
 SPU图片	spu_image
 SPU名称	spu_title
@@ -168,6 +468,9 @@ SKC图片	skc_image
 SKC库存	skc_inventory_quantity
 SKU	sku_id
 SKU库存	sku_inventory_quantity
+素材	asset_id
+素材内容	asset_content
+国家	country_cn
 GMV	line_item_gmv_usd
 销量	sales_quantity
 订单数	sales_orders
@@ -192,3 +495,5 @@ FB_CTR	fb_ctr
 浏览量	itemsviewed
 加购率	ga_add_to_cart_rate
 转化率	shopify_conversion_rate
+
+
