@@ -59,7 +59,7 @@ GMV 销量 订单数 净收入 退款A 发货前退款数量 实际发货数量 
   },
   "limit": 1000                    
 }；
-5) 国家下拉框：
+5) 市场下拉框：
 {
   "dimensions": ["ads_shopify_phone_aggregation_test_view.is_ai_product"], // 指定你想获取列表的维度
   "order": {
@@ -497,3 +497,205 @@ FB_CTR	fb_ctr
 转化率	shopify_conversion_rate
 
 
+
+
+继续对在6贝蒙沃森下面新建一个“手机壳运营数据面板-线上”的面板进行改进：
+在筛选器下面，明细表的上面添加一系列汇总的卡牌：
+包含SPU库存，SKC库存，SKU库存，GMV，销量，订单数，净收入，退款A，发货前退款数量，实际发货数量，广告总花费，FB花费，谷歌花费，Snap花费，FB曝光量，FB链接点击数，FB加入购物车数，FB订单数，FB_GMV，FB_ROAS，FB_CPA，FB_CPC，FB_CPM，FB_CTR，浏览量，加购率，转化率；
+每个卡牌的样式参考这张图：
+![Alt text](image.png)
+1.除了SPU库存，SKC库存，SKU库存本身作为type为number的dimension，可以不受filters限制外；
+2.其他卡牌的请求参数和返回数据，都需要根据筛选器动态过滤。
+每个卡牌的请求参数和返回数据：
+1）SPU库存：
+{
+  "dimensions": ["ads_shopify_phone_aggregation_test_view.spu_inventory_quantity"],
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.spu_inventory_quantity": "desc"
+  },
+  "limit": 1000
+} 
+2）SKC库存：
+{
+  "dimensions": ["ads_shopify_phone_aggregation_test_view.skc_inventory_quantity"],
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.skc_inventory_quantity": "desc"
+  },
+  "limit": 1000
+} 
+3）SKU库存：
+{
+  "dimensions": ["ads_shopify_phone_aggregation_test_view.sku_inventory_quantity"],
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.sku_inventory_quantity": "desc"
+  },
+  "limit": 1000
+} 
+
+6）GMV：
+{  "measures": ["ads_shopify_phone_aggregation_test_view.line_item_gmv_usd"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.line_item_gmv_usd": "desc"
+  },
+  "limit": 1000
+} 
+7）销量：
+{  "measures": ["ads_shopify_phone_aggregation_test_view.sales_quantity"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.sales_quantity": "desc"
+  },
+  "limit": 1000
+} 
+8）订单数：
+{  "measures": ["ads_shopify_phone_aggregation_test_view.sales_orders"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.sales_orders": "desc"
+  },
+  "limit": 1000
+}   
+9）净收入：
+{  "measures": ["ads_shopify_phone_aggregation_test_view.line_item_income_usd"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.line_item_income_usd": "desc"
+  },
+  "limit": 1000
+} 
+10）退款A：
+{  "measures": ["ads_shopify_phone_aggregation_test_view.created_order_unfulfilled_refund_amount_usd"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.created_order_unfulfilled_refund_amount_usd": "desc"
+  },
+  "limit": 1000
+} 
+11）发货前退款数量：
+{  "measures": ["ads_shopify_phone_aggregation_test_view.created_order_unfulfilled_refund_quantity"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.created_order_unfulfilled_refund_quantity": "desc"
+  },
+  "limit": 1000
+} 
+12）实际发货数量：
+{  "measures": ["ads_shopify_phone_aggregation_test_view.fulfilled_quantity"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.fulfilled_quantity": "desc"
+  },
+  "limit": 1000
+}   
+13）广告总花费：
+{  "measures": ["ads_shopify_phone_aggregation_test_view.total_ad_cost"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.total_ad_cost": "desc"
+  },
+  "limit": 1000
+} 
+14）FB花费：
+{  "measures": ["ads_shopify_phone_aggregation_test_view.fb_spend_usd"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.fb_spend_usd": "desc"
+  },
+  "limit": 1000
+} 
+15）谷歌花费：
+{  "measures": ["ads_shopify_phone_aggregation_test_view.google_spend_usd"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.google_spend_usd": "desc"
+  },
+  "limit": 1000
+} 
+16）Snap花费：
+{  "measures": ["ads_shopify_phone_aggregation_test_view.snapchat_spend_usd"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.snapchat_spend_usd": "desc"
+  },
+  "limit": 1000
+} 
+17）FB曝光量：
+{  "measures": ["ads_shopify_phone_aggregation_test_view.fb_impressions"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.fb_impressions": "desc"
+  },
+  "limit": 1000
+} 
+18）FB链接点击数：
+{  "measures": ["ads_shopify_phone_aggregation_test_view.fb_inline_link_clicks"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.fb_inline_link_clicks": "desc"
+  },
+  "limit": 1000
+} 
+19）FB加入购物车数
+{  "measures": ["ads_shopify_phone_aggregation_test_view.fb_add_to_cart"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.fb_add_to_cart": "desc"
+  },
+  "limit": 1000
+} 
+20）FB订单数
+  {  "measures": ["ads_shopify_phone_aggregation_test_view.fb_purchase"], "order": {
+    "ads_shopify_phone_aggregation_test_view.fb_purchase": "desc"
+  },
+  "limit": 1000
+}  
+21）FB_GMV
+{  "measures": ["ads_shopify_phone_aggregation_test_view.fb_purchase_gmv"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.fb_purchase_gmv": "desc"
+  },
+  "limit": 1000
+} 
+22）FB_ROAS 
+{  "measures": ["ads_shopify_phone_aggregation_test_view.fb_roas"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.fb_roas": "desc"
+  },
+  "limit": 1000
+} 
+23）FB_CPA
+{  "measures": ["ads_shopify_phone_aggregation_test_view.fb_cpa"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.fb_cpa": "desc"
+  },
+  "limit": 1000
+}   
+24）FB_CPC
+{  "measures": ["ads_shopify_phone_aggregation_test_view.fb_cpc"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.fb_cpc": "desc"
+  },
+  "limit": 1000
+}   
+25）FB_CPM
+{  "measures": ["ads_shopify_phone_aggregation_test_view.fb_cpm"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.fb_cpm": "desc"
+  },
+  "limit": 1000
+}
+26）FB_CTR
+{  "measures": ["ads_shopify_phone_aggregation_test_view.fb_ctr"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.fb_ctr": "desc"
+  },
+  "limit": 1000
+}
+27）浏览量
+{  "measures": ["ads_shopify_phone_aggregation_test_view.itemsviewed"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.itemsviewed": "desc"
+  },
+  "limit": 1000
+}
+28）加购率
+{  "measures": ["ads_shopify_phone_aggregation_test_view.ga_add_to_cart_rate"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.ga_add_to_cart_rate": "desc"
+  },
+  "limit": 1000
+}
+29）转化率
+{  "measures": ["ads_shopify_phone_aggregation_test_view.shopify_conversion_rate"], 
+  "order": {
+    "ads_shopify_phone_aggregation_test_view.shopify_conversion_rate": "desc"
+  },
+  "limit": 1000
+}
