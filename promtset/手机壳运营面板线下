@@ -19,9 +19,11 @@ SKC，SKU，国家 作为可选筛选；只有当筛选器前的勾选框被选�
 修改贝蒙沃森下面“手机壳运营数据面板-线下”面板的数据请求参数和渲染规则，这个面板的数据源是："ads_shopify_phone_ap_aggregation_view"
 一：筛选器数据请求参数和渲染规则：
 说明：
+说明：
 - 开始日期、结束日期：使用 Lovable 日期控件，不需要从 Cube 返回选项
 - 其他下拉筛选项：通过 Cube Query 获取 distinct 列表渲染下拉框
 - 下拉筛选项选择后，需要把选中的 values 写入“文本表”的 filters 中，实现联动
+
 1) SPU（多选下拉框）：
 {
   "dimensions": ["ads_shopify_phone_ap_aggregation_view.spu_id"], // 指定你想获取列表的维度
@@ -30,6 +32,7 @@ SKC，SKU，国家 作为可选筛选；只有当筛选器前的勾选框被选�
   },
   "limit": 1000                   
 }；
+
 2) SKC（多选下拉框）：
 {
   "dimensions": ["ads_shopify_phone_ap_aggregation_view.skc_id"], // 指定你想获取列表的维度
@@ -62,20 +65,20 @@ SKC，SKU，国家 作为可选筛选；只有当筛选器前的勾选框被选�
   },
   "limit": 1000                    
 }；
+
+
 二、筛选器与文本表 filters 的联动规则
 将筛选器的选中值动态传参到文本表的 filters：
 渠道 （多选下拉框）：
   - member = ads_shopify_phone_ap_aggregation_view.channel
   - operator = contains
   - values = [选中的渠道数组]
- 开始日期（Lovable 日期控件）：
-  - 写入 member = ads_shopify_phone_ap_aggregation_view.date
-  - operator = gte
-  - values = ["YYYY-MM-DD"] 或 ["YYYY-MM-DDTHH:MM:SSZ"]
-结束日期（Lovable 日期控件）：
-  - 写入 member = ads_shopify_phone_ap_aggregation_view.date
-  - operator = gte
-  - values = ["YYYY-MM-DD"] 或 ["YYYY-MM-DDTHH:MM:SSZ"]
+
+开始日期,结束日期（Lovable 日期控件）：
+  - member: ads_shopify_phone_ap_aggregation_view.time
+  - operator: inDateRange
+  - values: [Lovable 日期控件日期选择]
+
 
 SPU （多选下拉框）：
   - member = ads_shopify_phone_ap_aggregation_view.spu_id
@@ -194,7 +197,7 @@ Cube Query：
   "timeDimensions": [
     {
       "dimension": "ads_shopify_phone_ap_aggregation_view.date",
-      "dateRange": [],
+      "dateRange": ["开始日期", "结束日期"],
       "granularity": "day"
     }
   ],
@@ -254,7 +257,7 @@ Cube Query：
   "timeDimensions": [
     {
       "dimension": "ads_shopify_phone_ap_aggregation_view.date",
-      "dateRange": [],
+      "dateRange": ["开始日期", "结束日期"],
       "granularity": "day"
     }
   ],
@@ -309,7 +312,7 @@ Cube Query：
   "timeDimensions": [
     {
       "dimension": "ads_shopify_phone_ap_aggregation_view.date",
-      "dateRange": [],
+      "dateRange": ["开始日期", "结束日期"],
       "granularity": "day"
     }
   ],
@@ -365,7 +368,7 @@ Cube Query：
   "timeDimensions": [
     {
       "dimension": "ads_shopify_phone_ap_aggregation_view.date",
-      "dateRange": [],
+      "dateRange": ["开始日期", "结束日期"],
       "granularity": "day"
     }
   ],
