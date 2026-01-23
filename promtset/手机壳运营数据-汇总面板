@@ -1,0 +1,225 @@
+在6贝蒙沃森下面新建一个“手机壳运营数据-汇总面板”的面板，
+筛选器：
+渠道，开始日期，结束日期，是否测款；
+对于筛选器分组：
+  事务性描述： 渠道，开始日期，结束日期，是否测款；
+汇总卡片：
+GMV，销量，净收入，退款A，发货前退款数量，实际发货数量，广告总花费，FB花费，谷歌花费，Snap花费，FB曝光量，FB链接点击数，FB加入购物车数，FB_GMV，FB_ROAS，库存数量；
+说明：库存数量作为一个单独不受筛选器控制的卡片，需要单放一行
+
+明细表，【所有列具有排序功能】：
+明细表列包括：SPU SPU图片 SPU名称 SKC SKC名称 SKC库存 SKU SKU图片 库存数量
+只需要生成面板样式，不需要请求参数和返回数据；给我这个用户 admin的权限
+
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+修改贝蒙沃森下面“手机壳运营数据-汇总面板”面板的数据请求参数和渲染规则，这个面板的数据源是："ads_shopify_phone_all_aggregation_view"和"ads_phone_case_inventory_data_view"
+一：筛选器数据请求参数和渲染规则：
+说明：
+说明：
+- 开始日期、结束日期：使用 Lovable 日期控件，不需要从 Cube 返回选项
+- 其他下拉筛选项：通过 Cube Query 获取 distinct 列表渲染下拉框
+- 下拉筛选项选择后，需要把选中的 values 写入“文本表”的 filters 中，实现联动
+
+1) 渠道（多选下拉框）：
+{
+  "dimensions": ["ads_shopify_phone_all_aggregation_view.channel"], // 指定你想获取列表的维度
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.channel": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+2）是否测款
+{
+  "dimensions": ["ads_shopify_phone_all_aggregation_view.is_ai_product"], // 指定你想获取列表的维度
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.is_ai_product": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+3) 开始日期、结束日期：使用 Lovable 日期控件，不需要从 Cube 返回选项
+
+二、筛选器与文本表 filters 的联动规则
+将筛选器的选中值动态传参到文本表的 filters：
+渠道 （多选下拉框）：
+  - member = ads_shopify_phone_all_aggregation_view.channel
+  - operator = contains
+  - values = [选中的渠道数组]
+
+ 开始日期（Lovable 日期控件）：
+  - 写入 member = ads_shopify_phone_all_aggregation_view.date
+  - operator = gte
+  - values = ["YYYY-MM-DD"] 或 ["YYYY-MM-DDTHH:MM:SSZ"]
+
+结束日期（Lovable 日期控件）：
+  - 写入 member = ads_shopify_phone_all_aggregation_view.date
+  - operator = lte
+  - values = ["YYYY-MM-DD"] 或 ["YYYY-MM-DDTHH:MM:SSZ"]
+
+是否测款 （单选下拉框）：
+  - member = ads_shopify_phone_all_aggregation_view.is_ai_product
+  - operator = contains
+  - values = [选中的是否测款数组]
+
+三：汇总卡片Cube Query（需要与与筛选器联动）
+每个卡牌的请求参数和返回数据：
+1）GMV：
+{  "measures": ["ads_shopify_phone_all_aggregation_view.gmv"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.gmv": "desc"
+  },
+  "limit": 1000
+} 
+2）销量：
+{  "measures": ["ads_shopify_phone_all_aggregation_view.sales_quantity"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.sales_quantity": "desc"
+  },
+  "limit": 1000
+} 
+3）净收入：
+{  "measures": ["ads_shopify_phone_all_aggregation_view.line_item_income_usd"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.line_item_income_usd": "desc"
+  },
+  "limit": 1000
+} 
+4）退款A：
+{  "measures": ["ads_shopify_phone_all_aggregation_view.created_order_unfulfilled_refund_amount_usd"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.created_order_unfulfilled_refund_amount_usd": "desc"
+  },
+  "limit": 1000
+} 
+5）发货前退款数量：
+{  "measures": ["ads_shopify_phone_all_aggregation_view.created_order_unfulfilled_refund_quantity"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.created_order_unfulfilled_refund_quantity": "desc"
+  },
+  "limit": 1000
+} 
+6）实际发货数量：
+{  "measures": ["ads_shopify_phone_all_aggregation_view.fulfilled_quantity"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.fulfilled_quantity": "desc"
+  },
+  "limit": 1000
+}   
+7）广告总花费：
+{  "measures": ["ads_shopify_phone_all_aggregation_view.ad_total_spend"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.ad_total_spend": "desc"
+  },
+  "limit": 1000
+} 
+8）FB花费：
+{  "measures": ["ads_shopify_phone_all_aggregation_view.fb_spend_usd"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.fb_spend_usd": "desc"
+  },
+  "limit": 1000
+} 
+9）谷歌花费：
+{  "measures": ["ads_shopify_phone_all_aggregation_view.google_spend_usd"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.google_spend_usd": "desc"
+  },
+  "limit": 1000
+} 
+10）Snap花费：
+{  "measures": ["ads_shopify_phone_all_aggregation_view.snapchat_spend_usd"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.snapchat_spend_usd": "desc"
+  },
+  "limit": 1000
+} 
+11）FB曝光量：
+{  "measures": ["ads_shopify_phone_all_aggregation_view.fb_impressions"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.fb_impressions": "desc"
+  },
+  "limit": 1000
+} 
+12）FB链接点击数：
+{  "measures": ["ads_shopify_phone_all_aggregation_view.fb_inline_link_clicks"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.fb_inline_link_clicks": "desc"
+  },
+  "limit": 1000
+} 
+13）FB加入购物车数
+{  "measures": ["ads_shopify_phone_all_aggregation_view.fb_add_to_cart"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.fb_add_to_cart": "desc"
+  },
+  "limit": 1000
+}  
+14）FB_GMV
+{  "measures": ["ads_shopify_phone_all_aggregation_view.fb_purchase_gmv"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.fb_purchase_gmv": "desc"
+  },
+  "limit": 1000
+} 
+15）FB_ROAS 
+{  "measures": ["ads_shopify_phone_all_aggregation_view.fb_roas"], 
+  "order": {
+    "ads_shopify_phone_all_aggregation_view.fb_roas": "desc"
+  },
+  "limit": 1000
+} 
+
+四：文本表（明细数据）Cube Query（注意：不需要与与筛选器联动）
+{
+  "measures": 
+    [
+    "ads_phone_case_inventory_data_view.sku_inventory_quantity"
+    ],
+  "dimensions": 
+    [
+    "ads_phone_case_inventory_data_view.spu_id", 
+    "ads_phone_case_inventory_data_view.spu_image", 
+    "ads_phone_case_inventory_data_view.spu_title",
+    "ads_phone_case_inventory_data_view.skc_id", 
+    "ads_phone_case_inventory_data_view.skc_image", 
+    "ads_phone_case_inventory_data_view.skc_title", 
+    "ads_phone_case_inventory_data_view.sku_id"
+    ],
+  "filters": [
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_phone_case_inventory_data_view.spu": "desc"
+  }
+}
+
+五 面板文本内容与cube字段的映射关系：
+说明：明细数据表格中，每个SPU行展示的数据，是根据Cube Query返回的数据，进行映射关系转换后展示的；
+
+渠道 ads_shopify_phone_all_aggregation_view.channel 
+
+GMV ads_shopify_phone_all_aggregation_view.gmv
+销量 ads_shopify_phone_all_aggregation_view.sales_quantity
+净收入 ads_shopify_phone_all_aggregation_view.line_item_income_usd
+退款A ads_shopify_phone_all_aggregation_view.created_order_unfulfilled_refund_amount_usd
+发货前退款数量 ads_shopify_phone_all_aggregation_view.created_order_unfulfilled_refund_quantity
+实际发货数量 ads_shopify_phone_all_aggregation_view.fulfilled_quantity
+广告总花费 ads_shopify_phone_all_aggregation_view.ad_total_spend
+FB花费 ads_shopify_phone_all_aggregation_view.fb_spend_usd
+谷歌花费 ads_shopify_phone_all_aggregation_view.google_spend_usd
+Snap花费 ads_shopify_phone_all_aggregation_view.snapchat_spend_usd
+FB曝光量 ads_shopify_phone_all_aggregation_view.fb_impressions
+FB链接点击数 ads_shopify_phone_all_aggregation_view.fb_inline_link_clicks
+FB加入购物车数 ads_shopify_phone_all_aggregation_view.fb_add_to_cart
+FB_GMV ads_shopify_phone_all_aggregation_view.fb_purchase_gmv
+FB_ROAS ads_shopify_phone_all_aggregation_view.fb_roas
+SPU	ads_phone_case_inventory_data_view.spu_id
+SPU图片	ads_phone_case_inventory_data_view.spu_image
+SPU名称	ads_phone_case_inventory_data_view.spu_title
+SKC	ads_phone_case_inventory_data_view.skc_id
+SKC图片	ads_phone_case_inventory_data_view.skc_image
+SKC名称	ads_phone_case_inventory_data_view.skc_title
+SKU	ads_phone_case_inventory_data_view.sku_id
+库存数量	ads_phone_case_inventory_data_view.sku_inventory_quantity
+
+
+
