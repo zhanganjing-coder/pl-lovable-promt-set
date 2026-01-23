@@ -1,0 +1,310 @@
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+
+修改“3PLBG-商品”路径下的“商品销售排名概况”面板的数据请求参数和渲染规则，这个面板的数据源是：`ads_shopify_ad_by_spu_view`（Cube View）。
+
+
+一、筛选器（下拉选项）Cube Query
+
+说明：
+- 开始日期、结束日期：使用 Lovable 日期控件，不需要从 Cube 返回选项
+- Top N：使用 Lovable 的数字输入控件，允许用户输入 1-N 的整数，只影响"SPU明细数据"文本表，不影响"按品类汇总"文本表
+- 其他下拉筛选项：通过 Cube Query 获取 distinct 列表渲染下拉框，并且下拉筛选项选择后，需要把选中的 values 写入文本表的 filters 中，实现联动
+
+1）开售年月（listing_ym）下拉选项
+{
+  "dimensions": ["ads_shopify_ad_by_spu_view.listing_ym"],
+  "limit": 1000,
+  "order": {
+    "ads_shopify_ad_by_spu_view.listing_ym": "desc"
+  }
+}
+
+2）渠道（channel）下拉选项
+{
+  "dimensions": ["ads_shopify_ad_by_spu_view.channel"],
+  "limit": 1000,
+  "order": {
+    "ads_shopify_ad_by_spu_view.channel": "asc"
+  }
+}
+
+3）品类（category）下拉选项
+{
+  "dimensions": ["ads_shopify_ad_by_spu_view.category"],
+  "limit": 1000,
+  "order": {
+    "ads_shopify_ad_by_spu_view.category": "asc"
+  }
+}
+
+4）SU Name（su_name）下拉选项
+{
+  "dimensions": ["ads_shopify_ad_by_spu_view.su_name"],
+  "limit": 1000,
+  "order": {
+    "ads_shopify_ad_by_spu_view.su_name": "asc"
+  }
+}
+
+5）SPU（spu）下拉选项
+{
+  "dimensions": ["ads_shopify_ad_by_spu_view.spu"],
+  "limit": 5000,
+  "order": {
+    "ads_shopify_ad_by_spu_view.spu": "asc"
+  }
+}
+
+
+二、筛选器与文本表的联动规则
+
+将筛选器的选中值动态传参到文本表的查询参数：
+
+- 开始日期（Lovable 日期控件）：
+  - 写入 filters = [{
+      "member": "ads_shopify_ad_by_spu_view.date",
+      "operator": "gte",
+      "values": ["开始日期"]
+    }]
+  - 日期格式支持 "YYYY-MM-DD" 或 "YYYY-MM-DDTHH:MM:SSZ" 格式
+
+- 结束日期（Lovable 日期控件）：
+  - 写入 filters = [{
+      "member": "ads_shopify_ad_by_spu_view.date",
+      "operator": "lte",
+      "values": ["结束日期"]
+    }]
+  - 日期格式支持 "YYYY-MM-DD" 或 "YYYY-MM-DDTHH:MM:SSZ" 格式
+
+- 开售年月（多选）：
+  - 写入 filters = [{
+      "member": "ads_shopify_ad_by_spu_view.listing_ym",
+      "operator": "contains",
+      "values": [选中的开售年月数组]
+    }]
+
+- 渠道（多选）：
+  - 写入 filters = [{
+      "member": "ads_shopify_ad_by_spu_view.channel",
+      "operator": "contains",
+      "values": [选中的渠道数组]
+    }]
+
+- 品类（多选）：
+  - 写入 filters = [{
+      "member": "ads_shopify_ad_by_spu_view.category",
+      "operator": "equals",
+      "values": [选中的品类数组]
+    }]
+  - 注意：使用 equals 操作符进行精确匹配，支持多选（values 数组包含多个值时，使用 IN 语义匹配任意一个值）
+
+- SU Name（多选）：
+  - 写入 filters = [{
+      "member": "ads_shopify_ad_by_spu_view.su_name",
+      "operator": "equals",
+      "values": [选中的SU Name数组]
+    }]
+  - 注意：使用 equals 操作符进行精确匹配，支持多选（values 数组包含多个值时，使用 IN 语义匹配任意一个值）
+
+- SPU（多选）：
+  - 写入 filters = [{
+      "member": "ads_shopify_ad_by_spu_view.spu",
+      "operator": "equals",
+      "values": [选中的SPU数组]
+    }]
+  - 注意：使用 equals 操作符进行精确匹配，支持多选（values 数组包含多个值时，使用 IN 语义匹配任意一个值）。例如选择 "104" 时，只会匹配 SPU 等于 "104" 的记录，不会匹配 "DS1049"、"1047" 等包含 "104" 的记录
+
+- Top N（数字输入控件）：
+  - 只影响"SPU明细数据"文本表，不影响"按品类汇总"文本表
+  - 写入 到"SPU明细数据"文本表的 Cube Query 的 limit 参数中，limit = Top N 值（如果用户输入了 Top N 值，且 Top N 值 <= 5000）
+  - 如果用户没有输入 Top N 值或者 Top N 值大于 5000，则 limit = 5000（默认值）
+
+筛选器与数据表的联动关系：
+- 开始日期、结束日期、开售年月、渠道、品类、SU Name、SPU：这些筛选器同时影响"按品类汇总"文本表和"SPU明细数据"文本表
+- Top N：只影响"SPU明细数据"文本表，不影响"按品类汇总"文本表
+
+
+三、按品类汇总文本表 Cube Query（与筛选器联动）
+
+用途：为"按品类汇总"文本表返回数据（按品类聚合），并根据筛选器动态过滤。
+
+Cube Query：
+{
+  "measures": [
+    "ads_shopify_ad_by_spu_view.sales_qty",
+    "ads_shopify_ad_by_spu_view.gmv",
+    "ads_shopify_ad_by_spu_view.net_income",
+    "ads_shopify_ad_by_spu_view.net_profit",
+    "ads_shopify_ad_by_spu_view.net_profit_ratio",
+    "ads_shopify_ad_by_spu_view.ads_cost"
+  ],
+  "dimensions": [
+    "ads_shopify_ad_by_spu_view.category"
+  ],
+  "filters": [
+    {
+      "member": "ads_shopify_ad_by_spu_view.date",
+      "operator": "gte",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_ad_by_spu_view.date",
+      "operator": "lte",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_ad_by_spu_view.listing_ym",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_ad_by_spu_view.channel",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_ad_by_spu_view.category",
+      "operator": "equals",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_ad_by_spu_view.su_name",
+      "operator": "equals",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_ad_by_spu_view.spu",
+      "operator": "equals",
+      "values": []
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_shopify_ad_by_spu_view.net_income": "desc"
+  }
+}
+
+文本表字段与 Cube 字段映射：
+- Category: ads_shopify_ad_by_spu_view.category
+- 销售数量: ads_shopify_ad_by_spu_view.sales_qty
+- GMV: ads_shopify_ad_by_spu_view.gmv
+- 净收入: ads_shopify_ad_by_spu_view.net_income
+- 净利润: ads_shopify_ad_by_spu_view.net_profit
+- 净利润率: ads_shopify_ad_by_spu_view.net_profit_ratio
+- 广告花费: ads_shopify_ad_by_spu_view.ads_cost
+
+前端计算字段（基于返回的数据计算）：
+注意：所有占比类字段（GMV%、净收入%、净利润%、广告花费%）都需要在前端基于当前筛选结果的总和进行计算，不能直接从 Cube 返回。在计算占比和率值时，注意处理分母为0的情况，避免除零错误。
+
+- GMV%：当前品类的GMV / 所有品类的GMV总和 * 100
+- 净收入%：当前品类的净收入 / 所有品类的净收入总和 * 100
+- 净利润%：当前品类的净利润 / 所有品类的净利润总和 * 100
+- 广告花费%：当前品类的广告花费 / 所有品类的广告花费总和 * 100
+
+
+总计行计算规则：
+- 销售数量：所有品类行的销售数量之和
+- GMV：所有品类行的GMV之和
+- GMV%：100%（总计行占比始终为100%）
+- 净收入：所有品类行的净收入之和
+- 净收入%：100%（总计行占比始终为100%）
+- 净利润：所有品类行的净利润之和
+- 净利润%：100%（总计行占比始终为100%）
+- 净利润率：总计净利润 / 总计净收入 * 100（不能直接使用各行的净利润率，需要基于总计行的净利润和净收入重新计算）
+- 广告花费：所有品类行的广告花费之和
+- 广告花费%：100%（总计行占比始终为100%）
+
+
+四、SPU明细数据文本表 Cube Query（与筛选器联动）
+
+用途：为"SPU明细数据"文本表返回数据（SPU粒度一行一个SPU），并根据筛选器动态过滤。
+
+Cube Query：
+{
+  "measures": [
+    "ads_shopify_ad_by_spu_view.sales_qty",
+    "ads_shopify_ad_by_spu_view.gmv",
+    "ads_shopify_ad_by_spu_view.net_income",
+    "ads_shopify_ad_by_spu_view.net_profit",
+    "ads_shopify_ad_by_spu_view.net_profit_ratio",
+    "ads_shopify_ad_by_spu_view.ads_cost"
+  ],
+  "dimensions": [
+    "ads_shopify_ad_by_spu_view.spu",
+    "ads_shopify_ad_by_spu_view.image"
+  ],
+  "filters": [
+    {
+      "member": "ads_shopify_ad_by_spu_view.date",
+      "operator": "gte",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_ad_by_spu_view.date",
+      "operator": "lte",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_ad_by_spu_view.listing_ym",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_ad_by_spu_view.channel",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_ad_by_spu_view.category",
+      "operator": "equals",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_ad_by_spu_view.su_name",
+      "operator": "equals",
+      "values": []
+    },
+    {
+      "member": "ads_shopify_ad_by_spu_view.spu",
+      "operator": "equals",
+      "values": []
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_shopify_ad_by_spu_view.net_income": "desc"
+  }
+}
+
+注意：limit 参数需要根据 Top N 筛选器的值动态设置，具体规则见"二、筛选器与文本表的联动规则"部分
+
+文本表字段与 Cube 字段映射：
+- SPU: ads_shopify_ad_by_spu_view.spu
+- 图片: ads_shopify_ad_by_spu_view.image
+- 销售数量: ads_shopify_ad_by_spu_view.sales_qty
+- GMV: ads_shopify_ad_by_spu_view.gmv
+- 净收入: ads_shopify_ad_by_spu_view.net_income
+- 净利润: ads_shopify_ad_by_spu_view.net_profit
+- 净利润率: ads_shopify_ad_by_spu_view.net_profit_ratio
+- 广告花费: ads_shopify_ad_by_spu_view.ads_cost
+
+前端计算字段（基于返回的数据计算）：
+注意：所有占比类字段（GMV%、净收入%、净利润%、广告花费%）都需要在前端基于当前筛选结果的总和进行计算，不能直接从 Cube 返回。在计算占比和率值时，注意处理分母为0的情况，避免除零错误。
+
+- GMV%：当前SPU的GMV / 所有SPU的GMV总和 * 100
+- 净收入%：当前SPU的净收入 / 所有SPU的净收入总和 * 100
+- 净利润%：当前SPU的净利润 / 所有SPU的净利润总和 * 100
+- 广告花费%：当前SPU的广告花费 / 所有SPU的广告花费总和 * 100
+
+
+总计行计算规则：
+- 销售数量：所有SPU行的销售数量之和
+- GMV：所有SPU行的GMV之和
+- GMV%：100%（总计行占比始终为100%）
+- 净收入：所有SPU行的净收入之和
+- 净收入%：100%（总计行占比始终为100%）
+- 净利润：所有SPU行的净利润之和
+- 净利润%：100%（总计行占比始终为100%）
+- 净利润率：总计净利润 / 总计净收入 * 100（不能直接使用各行的净利润率，需要基于总计行的净利润和净收入重新计算）
+- 广告花费：所有SPU行的广告花费之和
+- 广告花费%：100%（总计行占比始终为100%）
