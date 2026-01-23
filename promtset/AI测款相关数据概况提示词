@@ -1,4 +1,3 @@
-
 官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
 
 修改“PLBG-商品”路径下的“AI测款相关数据概况”面板的数据请求参数和渲染规则，这个面板的数据源是：`ads_ai_product_testing_overview_view`（Cube View）。
@@ -110,8 +109,9 @@
 
 - SPU（多选）：
   - member = ads_ai_product_testing_overview_view.sample_code
-  - operator = contains
+  - operator = equals
   - values = [选中的SPU数组]
+  - 注意：使用 equals 操作符进行精确匹配，支持多选（values 数组包含多个值时，使用 IN 语义匹配任意一个值）。例如选择 "104" 时，只会匹配 SPU 等于 "104" 的记录，不会匹配 "DS1049"、"1047" 等包含 "104" 的记录
 
 - 开测年月（多选）：
   - member = ads_ai_product_testing_overview_view.test_year_month
@@ -125,13 +125,15 @@
 
 - 品类（多选）：
   - member = ads_ai_product_testing_overview_view.category
-  - operator = contains
+  - operator = equals
   - values = [选中的品类数组]
+  - 注意：使用 equals 操作符进行精确匹配，支持多选（values 数组包含多个值时，使用 IN 语义匹配任意一个值）
 
 - SU Name（多选）：
   - member = ads_ai_product_testing_overview_view.su_name
-  - operator = contains
+  - operator = equals
   - values = [选中的SU Name数组]
+  - 注意：使用 equals 操作符进行精确匹配，支持多选（values 数组包含多个值时，使用 IN 语义匹配任意一个值）
 
 - 到货年月（多选）：
   - member = ads_ai_product_testing_overview_view.earliest_delivery_ym
@@ -208,7 +210,7 @@ Cube Query：
     },
     {
       "member": "ads_ai_product_testing_overview_view.sample_code",
-      "operator": "contains",
+      "operator": "equals",
       "values": []
     },
     {
@@ -223,12 +225,12 @@ Cube Query：
     },
     {
       "member": "ads_ai_product_testing_overview_view.category",
-      "operator": "contains",
+      "operator": "equals",
       "values": []
     },
     {
       "member": "ads_ai_product_testing_overview_view.su_name",
-      "operator": "contains",
+      "operator": "equals",
       "values": []
     },
     {
@@ -289,3 +291,4 @@ Cube Query：
 - 成本占比: ads_ai_product_testing_overview_view.cost_of_goods_ratio
 - 运费占比: ads_ai_product_testing_overview_view.shipping_ratio
 - 退款率: ads_ai_product_testing_overview_view.refund_ratio
+
