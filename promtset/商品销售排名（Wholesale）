@@ -1,0 +1,210 @@
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+
+“商品销售排名”这个面板所有数据均来自 `ads_product_sales_rank_view`（Cube View）。
+每个组件的具体数据请求参数和渲染规则如下，需要你根据这些要求和规则，修改组件的配置。
+
+一、筛选器下拉选项的 Cube Query
+
+1）销售渠道筛选项（多选）
+请求cube的query参数，返回可选的销售渠道列表，用于渲染“销售渠道”下拉框：
+{
+  "dimensions": ["ads_product_sales_rank_view.channel"],
+  "order": {
+    "ads_product_sales_rank_view.channel": "asc"
+  },
+  "limit": 100
+}
+
+2）销售地区筛选项（多选）
+请求cube的query参数，返回可选的销售地区列表，用于渲染“销售地区”下拉框：
+{
+  "dimensions": ["ads_product_sales_rank_view.country"],
+  "order": {
+    "ads_product_sales_rank_view.country": "asc"
+  },
+  "limit": 300
+}
+
+3）商品品类筛选项（多选）
+请求cube的query参数，返回可选的商品品类列表，用于渲染“商品品类”下拉框：
+{
+  "dimensions": ["ads_product_sales_rank_view.category_level1"],
+  "order": {
+    "ads_product_sales_rank_view.category_level1": "asc"
+  },
+  "limit": 200
+}
+
+4）开始日期 / 结束日期筛选器
+开始日期和结束日期使用 Lovable 自带的日期控件，不需要额外的 Cube Query。在后续明细表和图表的 Query 中，通过 filters 把这两个日期传递到
+ads_product_sales_rank_view.date 的 gte / lte 条件中。
+
+
+
+二、商品销售排名文本表（核心明细表）
+
+需求说明：
+- 粒度：SPU 一行
+- 与筛选器联动（开始日期、结束日期、销售渠道、销售地区、商品品类）
+- 字段包含：排名、SPU、时间、渠道、地区、品类、GMV 销售占比、上架日期
+- 渠道、地区列需要合并成一行里的多个标签
+
+请求cube的query参数，返回商品销售排名文本表的明细数据：
+{
+  "measures": [
+    "ads_product_sales_rank_view.gmv"
+  ],
+  "dimensions": [
+    "ads_product_sales_rank_view.spu",
+    "ads_product_sales_rank_view.category_level1",
+    "ads_product_sales_rank_view.listing_date"
+  ],
+  "filters": [
+    {
+      "member": "ads_product_sales_rank_view.date",
+      "operator": "gte",
+      "values": []          // 由“开始日期”筛选器传入，例如 ["2025-11-14"]
+    },
+    {
+      "member": "ads_product_sales_rank_view.date",
+      "operator": "lte",
+      "values": []          // 由“结束日期”筛选器传入，例如 ["2025-11-21"]
+    },
+    {
+      "member": "ads_product_sales_rank_view.channel",
+      "operator": "contains",
+      "values": []          // 由“销售渠道”多选筛选器传入（可为空表示全部）
+    },
+    {
+      "member": "ads_product_sales_rank_view.country",
+      "operator": "contains",
+      "values": []          // 由“销售地区”多选筛选器传入
+    },
+    {
+      "member": "ads_product_sales_rank_view.category_level1",
+      "operator": "contains",
+      "values": []          // 由“商品品类”多选筛选器传入
+    }
+  ],
+  "order": {
+    "ads_product_sales_rank_view.gmv": "desc"
+  },
+  "limit": 5000
+}
+
+明细表字段与渲染规则：
+
+- 排名：
+  - 不从 Cube 取字段。
+  - 在 Lovable 前端，对上述 Query 结果按 gmv 降序排序后，
+    使用行号（1,2,3, ...）作为“排名”显示。
+
+- SPU：
+  - 对应字段："ads_product_sales_rank_view.spu"。
+
+- 时间：
+  - 不单独从结果集中取字段。
+  - 使用当前筛选器中的开始日期、结束日期拼接文案，例如：
+    "2025-11-14 至 2025-11-21"。
+  - 每一行都显示相同的时间区间，表示当前筛选范围内该 SPU 的表现。
+
+- 渠道：
+  - 对应字段："ads_product_sales_rank_view.channel"。
+  - 不按明细维度展开多行，一个 SPU 在表格里只占一行。
+  - 如果有多个渠道，则在前端把这些值渲染为多个 tag（例如 “Amazon / Shopify / 天猫……”）。
+
+- 地区：
+  - 对应字段："ads_product_sales_rank_view.country"。
+  - 不按明细维度展开多行，一个 SPU 在表格里只占一行。
+  - 如果有多个地区，则在前端把这些值渲染为多个 tag（如 "US / UK / FR / DE……"）。
+
+- 品类：
+  - 对应字段："ads_product_sales_rank_view.category_level1"。
+
+- 销售额（GMV）：
+  - 对应字段："ads_product_sales_rank_view.gmv"。
+
+- 销售占比：
+  - 不直接从 Cube 取字段。
+  - 在 Lovable 前端基于当前 Query 结果计算：
+    - 设当前结果集中所有行 gmv 之和为 total_gmv；
+    - 某一行的销售占比 = 当前行 gmv / total_gmv；
+    - 渲染为百分比格式（例如 "19.1%"），可保留 1~2 位小数。
+
+- 上架日期：
+  - 对应字段："ads_product_sales_rank_view.listing_date"。
+
+
+
+三、品类销售占比分布饼图
+
+需求说明：
+- 展示在当前筛选条件下，各一级品类的 GMV 占比情况。
+- 与顶部的时间、销售渠道、销售地区、商品品类筛选器联动。
+
+Cube Query（品类占比数据）：
+{
+  "measures": [
+    "ads_product_sales_rank_view.gmv"
+  ],
+  "dimensions": [
+    "ads_product_sales_rank_view.category_level1"
+  ],
+  "filters": [
+    {
+      "member": "ads_product_sales_rank_view.date",
+      "operator": "gte",
+      "values": []        // 与明细表共用同一组全局筛选器
+    },
+    {
+      "member": "ads_product_sales_rank_view.date",
+      "operator": "lte",
+      "values": []
+    },
+    {
+      "member": "ads_product_sales_rank_view.channel",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_product_sales_rank_view.country",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_product_sales_rank_view.category_level1",
+      "operator": "contains",
+      "values": []
+    }
+  ],
+  "order": {
+    "ads_product_sales_rank_view.gmv": "desc"
+  },
+  "limit": 5000
+}
+
+图表渲染规则：
+- 图表类型：饼图。
+- 维度（扇区）：ads_product_sales_rank_view.category_level1。
+- 数值：ads_product_sales_rank_view.gmv。
+- 饼图自动根据各品类 GMV / 全部品类 GMV 之和计算占比，并渲染百分比标签。
+
+
+
+四、筛选器与 filters 的参数映射约定
+
+- 开始日期：
+  - 写入 ads_product_sales_rank_view.date 的 gte 过滤器 values[0]。
+- 结束日期：
+  - 写入 ads_product_sales_rank_view.date 的 lte 过滤器 values[0]。
+- 销售渠道：
+  - “销售渠道”多选下拉框的选中值写入
+    ads_product_sales_rank_view.channel 的 contains 过滤器 values 数组。
+- 销售地区：
+  - “销售地区”多选下拉框的选中值写入
+    ads_product_sales_rank_view.country 的 contains 过滤器 values 数组。
+- 商品品类：
+  - “商品品类”多选下拉框的选中值写入
+    ads_product_sales_rank_view.category_level1 的 contains 过滤器 values 数组。
+
+所有明细表和图表应共用同一套全局筛选参数，以保证联动行为一致。
