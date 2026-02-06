@@ -1,0 +1,858 @@
+当前5祥世-独立站-Facebook素材广告成效面板 - 素材列表；
+就有了一个面板；我要在这个5祥世-独立站目录下面再新建一个面板新建一个“Facebook素材分析”的面板，
+在5祥世-独立站这个文件夹下面新建一个“Facebook素材分析”的面板，
+
+
+
+当前5祥世-独立站-Facebook素材广告成效面板 - 素材列表
+我想对这个面板进行改进：
+筛选器：
+开始日期，结束日期，渠道，商品品类，团队，标签，投放地区
+
+明细表可以自定义维度：
+商品品类 渠道 团队 标签 asset_id 素材 CMS素材 投放地区 ；这个维度前面有勾选框，可以勾选：注意（投放地区单独分行，如果有两个国家就两行，三个国家三行）
+1)用户不进行任何的勾选的情况下，明细表【所有列具有排序功能】：默认显示字段：
+商品品类
+渠道
+团队
+标签
+asset_id
+素材
+CMS素材
+投放地区
+花费
+日均花费
+曝光
+点击
+购买
+FB_GMV
+点击率
+CPC
+CPA
+ROAS
+2) 用户只勾选了商品品类，明细表【所有列具有排序功能】：默认显示字段：
+商品品类
+花费
+日均花费
+曝光
+点击
+购买
+FB_GMV
+点击率
+CPC
+CPA
+ROAS
+3) 用户只勾选了渠道，明细表【所有列具有排序功能】：默认显示字段：
+渠道
+花费
+日均花费
+曝光
+点击
+购买
+FB_GMV
+点击率
+CPC
+CPA
+ROAS
+4)用户只勾选了团队，明细表【所有列具有排序功能】：默认显示字段：
+团队
+花费
+日均花费
+曝光
+点击
+购买
+FB_GMV
+点击率
+CPC
+CPA
+ROAS
+5) 用户只勾选了标签，明细表【所有列具有排序功能】：默认显示字段：
+标签
+花费
+日均花费
+曝光
+点击
+购买
+FB_GMV
+点击率
+CPC
+CPA
+ROAS
+6)用户只勾选了asset_id，明细表【所有列具有排序功能】：默认显示字段：   
+asset_id
+素材
+CMS素材
+花费
+日均花费
+曝光
+点击
+购买
+FB_GMV
+点击率
+CPC
+CPA
+ROAS
+7)用户勾选了投放地区：
+投放地区
+花费
+日均花费
+曝光
+点击
+购买
+FB_GMV
+点击率
+CPC
+CPA
+ROAS
+8) 用户勾选了商品品类，投放地区
+商品品类
+投放地区
+花费
+日均花费
+曝光
+点击
+购买
+FB_GMV
+点击率
+CPC
+CPA
+ROAS
+
+官方文档：https://cube.dev/docs/product/apis-integrations/core-data-apis/rest-api/query-format
+修改5祥世-独立站下面“Facebook素材分析”面板的数据请求参数和渲染规则，这个面板的数据源是："ads_facebook_material_report_view"
+一：筛选器数据请求参数和渲染规则：
+说明：
+说明：
+- 开始日期、结束日期：使用 Lovable 日期控件，不需要从 Cube 返回选项
+- 其他下拉筛选项：通过 Cube Query 获取 distinct 列表渲染下拉框
+- 下拉筛选项选择后，需要把选中的 values 写入“文本表”的 filters 中，实现联动
+
+1) 投放地区（多选下拉框）：
+{
+  "dimensions": ["ads_facebook_material_report_view.country"], // 指定你想获取列表的维度
+  "order": {
+    "ads_facebook_material_report_view.country": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+3) 开始日期
+结束日期：使用 Lovable 日期控件，不需要从 Cube 返回选项；
+2）商品品类
+{
+  "dimensions": ["ads_facebook_material_report_view.product_category"], // 指定你想获取列表的维度
+  "order": {
+    "ads_facebook_material_report_view.product_type": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+6）渠道
+{
+  "dimensions": ["ads_facebook_material_report_view.source"], // 指定你想获取列表的维度
+  "order": {
+    "ads_facebook_material_report_view.source": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+7）团队
+{
+  "dimensions": ["ads_facebook_material_report_view.team"], // 指定你想获取列表的维度
+  "order": {
+    "ads_facebook_material_report_view.team": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+8）标签
+{
+  "dimensions": ["ads_facebook_material_report_view.tag"], // 指定你想获取列表的维度
+  "order": {
+    "ads_facebook_material_report_view.tag": "asc"         // 可选：按字母顺序排序
+  },
+  "limit": 1000                    
+}；
+
+
+二、筛选器与文本表 filters 的联动规则
+将筛选器的选中值动态传参到文本表的 filters：
+投放地区 （多选下拉框）：
+  - member = ads_facebook_material_report_view.country
+  - operator = contains
+  - values = [选中的国家数组]
+
+开始日期（Lovable 日期控件）：
+  - 写入 member = ads_facebook_material_report_view.date_start
+  - operator = gte
+  - values = ["YYYY-MM-DD"] 或 ["YYYY-MM-DDTHH:MM:SSZ"]
+
+结束日期（Lovable 日期控件）：
+  - 写入 member = ads_facebook_material_report_view.date_start
+  - operator = lte
+  - values = ["YYYY-MM-DD"] 或 ["YYYY-MM-DDTHH:MM:SSZ"]
+
+商品品类（多选下拉框）：
+  - member = ads_facebook_material_report_view.product_type
+  - operator = contains
+  - values = [选中的商品类型数组]
+
+渠道（多选下拉框）：
+  - member = ads_facebook_material_report_view.source
+  - operator = contains
+  - values = [选中的素材形式数组]
+
+团队（多选下拉框）：
+  - member = ads_facebook_material_report_view.team
+  - operator = contains
+  - values = [选中的素材形式2数组]
+
+标签（多选下拉框）：
+  - member = ads_facebook_material_report_view.tag
+  - operator = contains
+  - values = [选中的标签数组]
+
+
+
+三：文本表（明细数据）Cube Query（注意：需要与与筛选器联动）
+明细表可以自定义维度, 筛选器是保持不变的；
+商品品类 渠道 团队 标签 asset_id 素材 CMS素材：这个几个维度前面有勾选框，可以勾选：
+用户不进行任何的勾选的情况下，明细表【所有列具有排序功能】：默认显示字段：
+{
+  "measures": 
+    [
+      "ads_facebook_material_report_view.fb_spend",
+       "ads_facebook_material_report_view.fb_impressions",
+       "ads_facebook_material_report_view.fb_inline_link_clicks",
+       "ads_facebook_material_report_view.fb_purchase",
+       "ads_facebook_material_report_view.fb_purchase_gmv",
+       "ads_facebook_material_report_view.fb_ctr",
+      "ads_facebook_material_report_view.fb_cpc",
+      "ads_facebook_material_report_view.fb_cpa",
+      "ads_facebook_material_report_view.fb_roas",
+    ],
+  "dimensions": 
+    [
+     "ads_facebook_material_report_view.asset_id", 
+    "ads_facebook_material_report_view.asset_content", 
+    "ads_facebook_material_report_view.media_url", 
+    "ads_facebook_material_report_view.product_category", 
+    "ads_facebook_material_report_view.source", 
+    "ads_facebook_material_report_view.team",
+    "ads_facebook_material_report_view.tag",
+    "ads_facebook_material_report_view.country"
+    ],
+  "filters": [
+    {
+      "member": "ads_facebook_material_report_view.source",
+      "operator": "contains",
+      "values": []
+
+    },
+    {
+      "member": "ads_facebook_material_report_view.product_category",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.team",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.tag",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.country",
+      "operator": "contains",
+      "values": []
+    }，
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "gte",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "lte",
+      "values": []
+    }
+   
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_phone_case_inventory_data_view.spu": "desc"
+  }
+}
+2）用户只勾选了商品品类，明细表【所有列具有排序功能】：默认显示字段：
+{
+  "measures": 
+    [
+      "ads_facebook_material_report_view.fb_spend",
+       "ads_facebook_material_report_view.fb_impressions",
+       "ads_facebook_material_report_view.fb_inline_link_clicks",
+       "ads_facebook_material_report_view.fb_purchase",
+       "ads_facebook_material_report_view.fb_purchase_gmv",
+       "ads_facebook_material_report_view.fb_ctr",
+      "ads_facebook_material_report_view.fb_cpc",
+      "ads_facebook_material_report_view.fb_cpa",
+      "ads_facebook_material_report_view.fb_roas",
+    ],
+  "dimensions": 
+    [
+     "ads_facebook_material_report_view.product_category", 
+    ],
+ "filters": [
+        {
+      "member": "ads_facebook_material_report_view.source",
+      "operator": "contains",
+      "values": []
+
+    },
+    {
+      "member": "ads_facebook_material_report_view.product_category",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.team",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.tag",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.country",
+      "operator": "contains",
+      "values": []
+    }，
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "gte",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "lte",
+      "values": []
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_facebook_material_report_view.product_category": "desc"
+  }
+}
+3）用户只勾选了渠道，明细表【所有列具有排序功能】：默认显示字段：
+{
+  "measures": 
+    [
+      "ads_facebook_material_report_view.fb_spend",
+       "ads_facebook_material_report_view.fb_impressions",
+       "ads_facebook_material_report_view.fb_inline_link_clicks",
+       "ads_facebook_material_report_view.fb_purchase",
+       "ads_facebook_material_report_view.fb_purchase_gmv",
+       "ads_facebook_material_report_view.fb_ctr",
+      "ads_facebook_material_report_view.fb_cpc",
+      "ads_facebook_material_report_view.fb_cpa",
+      "ads_facebook_material_report_view.fb_roas",
+    ],
+  "dimensions": 
+    [
+     "ads_facebook_material_report_view.source", 
+    ],
+  "filters": [
+        {
+      "member": "ads_facebook_material_report_view.source",
+      "operator": "contains",
+      "values": []
+
+    },
+    {
+      "member": "ads_facebook_material_report_view.product_category",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.team",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.tag",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.country",
+      "operator": "contains",
+      "values": []
+    }，
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "gte",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "lte",
+      "values": []
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_facebook_material_report_view.source": "desc"
+  }
+}
+4）用户只勾选了团队，明细表【所有列具有排序功能】：默认显示字段：
+{
+  "measures": 
+    [   
+      "ads_facebook_material_report_view.fb_spend",
+       "ads_facebook_material_report_view.fb_impressions",
+       "ads_facebook_material_report_view.fb_inline_link_clicks",
+       "ads_facebook_material_report_view.fb_purchase",
+       "ads_facebook_material_report_view.fb_purchase_gmv",
+       "ads_facebook_material_report_view.fb_ctr",
+      "ads_facebook_material_report_view.fb_cpc",
+      "ads_facebook_material_report_view.fb_cpa",
+      "ads_facebook_material_report_view.fb_roas",
+    ],
+  "dimensions": 
+    [
+     "ads_facebook_material_report_view.team", 
+    ],
+ "filters": [
+        {
+      "member": "ads_facebook_material_report_view.source",
+      "operator": "contains",
+      "values": []
+
+    },
+    {
+      "member": "ads_facebook_material_report_view.product_category",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.team",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.tag",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.country",
+      "operator": "contains",
+      "values": []
+    }，
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "gte",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "lte",
+      "values": []
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_facebook_material_report_view.team": "desc"
+  }
+}       
+5）用户只勾选了标签，明细表【所有列具有排序功能】：默认显示字段：
+{
+  "measures": 
+    [
+      "ads_facebook_material_report_view.fb_spend",
+       "ads_facebook_material_report_view.fb_impressions",
+       "ads_facebook_material_report_view.fb_inline_link_clicks",
+       "ads_facebook_material_report_view.fb_purchase",
+       "ads_facebook_material_report_view.fb_purchase_gmv",
+       "ads_facebook_material_report_view.fb_ctr",
+      "ads_facebook_material_report_view.fb_cpc",
+      "ads_facebook_material_report_view.fb_cpa",
+      "ads_facebook_material_report_view.fb_roas",
+    ],
+  "dimensions": 
+    [
+     "ads_facebook_material_report_view.tag", 
+    ],
+  "filters": [
+        {
+      "member": "ads_facebook_material_report_view.source",
+      "operator": "contains",
+      "values": []
+
+    },
+    {
+      "member": "ads_facebook_material_report_view.product_category",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.team",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.tag",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.country",
+      "operator": "contains",
+      "values": []
+    }，
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "gte",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "lte",
+      "values": []
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_facebook_material_report_view.tag": "desc"
+  }
+}
+6）用户只勾选了asset_id，明细表【所有列具有排序功能】：默认显示字段：
+{
+  "measures": 
+    [
+      "ads_facebook_material_report_view.fb_spend",
+       "ads_facebook_material_report_view.fb_impressions",
+       "ads_facebook_material_report_view.fb_inline_link_clicks",
+       "ads_facebook_material_report_view.fb_purchase",
+       "ads_facebook_material_report_view.fb_purchase_gmv",
+       "ads_facebook_material_report_view.fb_ctr",
+      "ads_facebook_material_report_view.fb_cpc",
+      "ads_facebook_material_report_view.fb_cpa",
+      "ads_facebook_material_report_view.fb_roas",
+    ],
+  "dimensions": 
+    [
+     "ads_facebook_material_report_view.asset_id", 
+    ],
+  "filters": [
+        {
+      "member": "ads_facebook_material_report_view.source",
+      "operator": "contains",
+      "values": []
+
+    },
+    {
+      "member": "ads_facebook_material_report_view.product_category",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.team",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.tag",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.country",
+      "operator": "contains",
+      "values": []
+    }，
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "gte",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "lte",
+      "values": []
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_facebook_material_report_view.asset_id": "desc"
+  }
+}，
+6）用户只勾选了asset_content，明细表【所有列具有排序功能】：默认显示字段：
+{
+  "measures": 
+    [
+      "ads_facebook_material_report_view.fb_spend",
+       "ads_facebook_material_report_view.fb_impressions",
+       "ads_facebook_material_report_view.fb_inline_link_clicks",
+       "ads_facebook_material_report_view.fb_purchase",
+       "ads_facebook_material_report_view.fb_purchase_gmv",
+       "ads_facebook_material_report_view.fb_ctr",
+      "ads_facebook_material_report_view.fb_cpc",
+      "ads_facebook_material_report_view.fb_cpa",
+      "ads_facebook_material_report_view.fb_roas",
+    ],
+  "dimensions": 
+    [
+     "ads_facebook_material_report_view.asset_content", 
+    ],
+  "filters": [
+        {
+      "member": "ads_facebook_material_report_view.source",
+      "operator": "contains",
+      "values": []
+
+    },
+    {
+      "member": "ads_facebook_material_report_view.product_category",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.team",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.tag",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.country",
+      "operator": "contains",
+      "values": []
+    }，
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "gte",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "lte",
+      "values": []
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_facebook_material_report_view.asset_id": "desc"
+  }
+}
+7）用户只勾选了CMS素材，明细表【所有列具有排序功能】：默认显示字段：
+{
+  "measures": 
+    [
+      "ads_facebook_material_report_view.fb_spend",
+       "ads_facebook_material_report_view.fb_impressions",
+       "ads_facebook_material_report_view.fb_inline_link_clicks",
+       "ads_facebook_material_report_view.fb_purchase",
+       "ads_facebook_material_report_view.fb_purchase_gmv",
+       "ads_facebook_material_report_view.fb_ctr",
+      "ads_facebook_material_report_view.fb_cpc",
+      "ads_facebook_material_report_view.fb_cpa",
+      "ads_facebook_material_report_view.fb_roas",
+    ],
+  "dimensions": 
+    [
+     "ads_facebook_material_report_view.media_url", 
+    ],
+  "filters": [
+        {
+      "member": "ads_facebook_material_report_view.source",
+      "operator": "contains",
+      "values": []
+
+    },
+    {
+      "member": "ads_facebook_material_report_view.product_category",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.team",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.tag",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.country",
+      "operator": "contains",
+      "values": []
+    }，
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "gte",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "lte",
+      "values": []
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_facebook_material_report_view.asset_id": "desc"
+  }
+}
+7）用户勾选了投放地区：
+{
+  "measures": 
+    [
+      "ads_facebook_material_report_view.fb_spend",
+       "ads_facebook_material_report_view.fb_impressions",
+       "ads_facebook_material_report_view.fb_inline_link_clicks",
+       "ads_facebook_material_report_view.fb_purchase",
+       "ads_facebook_material_report_view.fb_purchase_gmv",
+       "ads_facebook_material_report_view.fb_ctr",
+      "ads_facebook_material_report_view.fb_cpc",
+      "ads_facebook_material_report_view.fb_cpa",
+      "ads_facebook_material_report_view.fb_roas",
+    ],
+  "dimensions": 
+    [
+     "ads_facebook_material_report_view.country", 
+    ],
+  "filters": [
+        {
+      "member": "ads_facebook_material_report_view.source",
+      "operator": "contains",
+      "values": []
+
+    },
+    {
+      "member": "ads_facebook_material_report_view.product_category",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.team",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.tag",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.country",
+      "operator": "contains",
+      "values": []
+    }，
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "gte",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "lte",
+      "values": []
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_facebook_material_report_view.country": "desc"
+  } 
+}
+8) 用户勾选了商品品类，投放地区：
+{
+  "measures": 
+    [
+      "ads_facebook_material_report_view.fb_spend",
+       "ads_facebook_material_report_view.fb_impressions",
+       "ads_facebook_material_report_view.fb_inline_link_clicks",
+       "ads_facebook_material_report_view.fb_purchase",
+       "ads_facebook_material_report_view.fb_purchase_gmv",
+       "ads_facebook_material_report_view.fb_ctr",
+      "ads_facebook_material_report_view.fb_cpc",
+      "ads_facebook_material_report_view.fb_cpa",
+      "ads_facebook_material_report_view.fb_roas",
+    ],
+  "dimensions": 
+    [
+     "ads_facebook_material_report_view.product_category", 
+     "ads_facebook_material_report_view.country", 
+    ],
+  "filters": [
+       {
+      "member": "ads_facebook_material_report_view.source",
+      "operator": "contains",
+      "values": []
+
+    },
+    {
+      "member": "ads_facebook_material_report_view.product_category",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.team",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.tag",
+      "operator": "contains",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.country",
+      "operator": "contains",
+      "values": []
+    }，
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "gte",
+      "values": []
+    },
+    {
+      "member": "ads_facebook_material_report_view.date_start",
+      "operator": "lte",
+      "values": []
+    }
+  ],
+  "limit": 5000,
+  "order": {
+    "ads_facebook_material_report_view.product_category": "desc",
+    "ads_facebook_material_report_view.country": "desc"
+  } 
+}
+
+五 面板文本内容与cube字段的映射关系：
+说明：明细数据表格中，每个SPU行展示的数据，是根据Cube Query返回的数据，进行映射关系转换后展示的；
+
+开始日期 ads_facebook_material_report_view.date_start
+结束日期 ads_facebook_material_report_view.date_start
+投放地区  ads_facebook_material_report_view.country
+asset_id ads_facebook_material_report_view.asset_id
+素材 ads_facebook_material_report_view.asset_content
+CMS素材 ads_facebook_material_report_view.media_url
+商品品类 ads_facebook_material_report_view.product_category
+渠道  ads_facebook_material_report_view.source
+团队   ads_facebook_material_report_view.team
+标签  ads_facebook_material_report_view.tag
+花费 ads_facebook_material_report_view.fb_spend
+曝光 ads_facebook_material_report_view.fb_impressions
+FB_GMV ads_facebook_material_report_view.fb_purchase_gmv
+点击 ads_facebook_material_report_view.fb_inline_link_clicks
+购买 ads_facebook_material_report_view.fb_purchase
+点击率 ads_facebook_material_report_view.fb_ctr
+CPC ads_facebook_material_report_view.fb_cpc
+CPA ads_facebook_material_report_view.fb_cpa
+ROAS ads_facebook_material_report_view.fb_roas
